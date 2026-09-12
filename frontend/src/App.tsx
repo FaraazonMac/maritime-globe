@@ -53,7 +53,6 @@ function markerSVG(kind, status) {
       <path d="M12 2 L18 22 L6 22 Z" fill="#f2c94c" stroke="#0a1420" stroke-width="1"/>
     </svg>`
   }
-  // port
   return `<svg width="16" height="16" viewBox="0 0 24 24">
     <circle cx="12" cy="6" r="3" fill="none" stroke="#7f95a8" stroke-width="2"/>
     <path d="M12 9 L12 20 M6 14 A6 7 0 0 0 12 20 A6 7 0 0 0 18 14"
@@ -90,6 +89,7 @@ function App() {
         htmlElement={(d) => {
           const el = document.createElement('div')
           el.title = d.name
+          el.style.pointerEvents = 'auto'
 
           if (d.type) {
             el.innerHTML = markerSVG('ship', d.status)
