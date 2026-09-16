@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import Globe from 'react-globe.gl'
+import * as THREE from 'three'
 
 const ports = [
   { name: 'Rotterdam', lat: 51.95, lng: 4.14 },
@@ -13,41 +14,7 @@ const lighthouses = [
   { name: 'Cape Otway Lighthouse', lat: -38.86, lng: 143.51 },
 ]
 
-const ships = [
-  {
-    name: 'MV Pacific Glory', lat: 1.5, lng: 104.1, type: 'Container Ship',
-    flag: 'Panama', operator: 'Maersk Line', buildYear: 2015,
-    origin: 'Shanghai', destination: 'Rotterdam', status: 'moving',
-  },
-  {
-    name: 'MV Atlas', lat: 51.95, lng: 4.14, type: 'Tanker',
-    flag: 'Liberia', operator: 'MSC', buildYear: 2018,
-    origin: 'Jebel Ali', destination: 'Singapore', status: 'anchored-port',
-  },
-  {
-    name: 'MV Northern Star', lat: 29.97, lng: 32.55, type: 'Bulk Carrier',
-    flag: 'Marshall Islands', operator: 'COSCO Shipping', buildYear: 2012,
-    origin: 'Mumbai', destination: 'Hamburg', status: 'anchored-sea',
-  },
-  {
-    name: 'MV Ocean Pioneer', lat: 25.3, lng: 55.4, type: 'Passenger Ship',
-    flag: 'Malta', operator: 'Star Bulk', buildYear: 2020,
-    origin: 'Piraeus', destination: 'Busan', status: 'anchored-port',
-  },
-]
-
-function markerSVG(kind, status) {
-  if (kind === 'ship') {
-    if (status === 'moving') {
-      return `<svg width="18" height="18" viewBox="0 0 24 24">
-        <path d="M12 2 L20 20 L12 15 L4 20 Z" fill="#3fd9c7" stroke="#0a1420" stroke-width="1"/>
-      </svg>`
-    }
-    const color = status === 'anchored-port' ? '#4a90d9' : '#e07b3f'
-    return `<svg width="14" height="14" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="8" fill="${color}" stroke="#0a1420" stroke-width="1.5"/>
-    </svg>`
-  }
+function markerSVG(kind) {
   if (kind === 'lighthouse') {
     return `<svg width="14" height="14" viewBox="0 0 24 24">
       <path d="M12 2 L18 22 L6 22 Z" fill="#f2c94c" stroke="#0a1420" stroke-width="1"/>
@@ -59,31 +26,95 @@ function markerSVG(kind, status) {
       fill="none" stroke="#7f95a8" stroke-width="2"/>
   </svg>`
 }
+// Draws a clean flat arrow onto a small canvas, once per color, and reuses
+// it — this is what makes it look crisp like the old SVG version while
+// staying cheap enough to render hundreds of times.
+const shipTextureCache = {}
+function getShipTexture(shape, color) {
+  const key = `${shape}-${color}`
+  if (shipTextureCache[key]) return shipTextureCache[key]
 
+  const size = 64
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const ctx = canvas.getContext('2d')
+  ctx.fillStyle = color
+
+  if (shape === 'arrow') {
+    ctx.beginPath()
+    ctx.moveTo(size / 2, 4)
+    ctx.lineTo(size - 10, size - 10)
+    ctx.lineTo(size / 2, size - 22)
+    ctx.lineTo(10, size - 10)
+    ctx.closePath()
+    ctx.fill()
+  } else {
+    ctx.beginPath()
+    ctx.arc(size / 2, size / 2, size / 2 - 6, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  const texture = new THREE.CanvasTexture(canvas)
+  shipTextureCache[key] = texture
+  return texture
+}
+// Builds a real 3D marker per ship: a cone pointing its actual heading if
+// it's moving, or a plain dot if it's anchored (heading isn't meaningful
+// for a stationary ship). `d` is the ship's data object.
+function buildShipMarker(d) {
+  const color =
+    d.status === 'moving' ? '#3fd9c7' :
+    d.status === 'anchored-port' ? '#4a90d9' : '#e07b3f'
+
+  const group = new THREE.Group()
+  group.userData = d
+
+  const shape = d.status === 'moving' ? 'arrow' : 'circle'
+  const material = new THREE.SpriteMaterial({
+    map: getShipTexture(shape, color),
+    rotation: shape === 'arrow' ? THREE.MathUtils.degToRad(d.heading ?? 0) : 0,
+    sizeAttenuation: false,
+  })
+  const sprite = new THREE.Sprite(material)
+  sprite.scale.set(0.008, 0.008, 1)
+  group.add(sprite)
+
+  return group
+}
 function App() {
   const globeRef = useRef()
   const [selectedShip, setSelectedShip] = useState(null)
+  const [ships, setShips] = useState([])
 
   useEffect(() => {
-    if (globeRef.current) {
-      globeRef.current.controls().minDistance = 150
+    const loadShips = () => {
+      fetch('http://127.0.0.1:8000/ships')
+        .then((res) => res.json())
+        .then((data) => setShips(data))
+        .catch((err) => console.error('Failed to load ships:', err))
     }
+
+    loadShips()
+    const interval = setInterval(loadShips, 10000)
+    return () => clearInterval(interval)
   }, [])
 
   return (
     <div style={{ position: 'relative' }}>
       <Globe
         ref={globeRef}
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+        globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
-        ringsData={ships}
-        ringLat="lat"
-        ringLng="lng"
-        ringColor={() => (t) => `rgba(63, 217, 199, ${1 - t})`}
-        ringMaxRadius={3}
-        ringPropagationSpeed={2}
-        ringRepeatPeriod={1500}
-        htmlElementsData={[...ships, ...ports, ...lighthouses]}
+
+        objectsData={ships}
+        objectLat="lat"
+        objectLng="lng"
+        objectAltitude={0.01}
+        objectThreeObject={buildShipMarker}
+        onObjectClick={(obj) => setSelectedShip(obj.userData)}
+
+        htmlElementsData={[...ports, ...lighthouses]}
         htmlLat="lat"
         htmlLng="lng"
         htmlElement={(d) => {
@@ -91,11 +122,7 @@ function App() {
           el.title = d.name
           el.style.pointerEvents = 'auto'
 
-          if (d.type) {
-            el.innerHTML = markerSVG('ship', d.status)
-            el.style.cursor = 'pointer'
-            el.addEventListener('click', () => setSelectedShip(d))
-          } else if (lighthouses.includes(d)) {
+          if (lighthouses.includes(d)) {
             el.innerHTML = markerSVG('lighthouse')
           } else {
             el.innerHTML = markerSVG('port')
@@ -146,19 +173,13 @@ function App() {
 
           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, lineHeight: 1.9 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#7f95a8' }}>Flag</span><span>{selectedShip.flag}</span>
+              <span style={{ color: '#7f95a8' }}>Status</span><span>{selectedShip.status}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#7f95a8' }}>Operator</span><span>{selectedShip.operator}</span>
+              <span style={{ color: '#7f95a8' }}>Speed</span><span>{selectedShip.speed} kn</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#7f95a8' }}>Built</span><span>{selectedShip.buildYear}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#7f95a8' }}>From</span><span>{selectedShip.origin}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#7f95a8' }}>To</span><span>{selectedShip.destination}</span>
+              <span style={{ color: '#7f95a8' }}>Heading</span><span>{selectedShip.heading}°</span>
             </div>
           </div>
         </div>

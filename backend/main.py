@@ -1,12 +1,76 @@
+import asyncio
+import json
+import os
+from contextlib import asynccontextmanager
+
+import websockets
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+load_dotenv()
+API_KEY = os.getenv("AISSTREAM_API_KEY")
 
-# CORS = Cross-Origin Resource Sharing. Browsers block a webpage running on
-# one address (your frontend, localhost:5173) from fetching data from a
-# different address (your backend, 127.0.0.1:8000) unless the backend
-# explicitly says it's allowed. This is that permission.
+# In-memory store: latest known position per ship, keyed by MMSI.
+# A background task keeps this updated forever; /ships just reads
+# whatever's currently in here at the moment it's asked.
+live_ships: dict[int, dict] = {}
+
+STATUS_MAP = {
+    0: "moving", 1: "anchored-sea", 2: "anchored-sea", 3: "anchored-sea",
+    4: "anchored-sea", 5: "anchored-port", 6: "anchored-sea", 7: "moving",
+    8: "moving",
+}
+
+async def listen_to_ais():
+    async with websockets.connect("wss://stream.aisstream.io/v0/stream") as ws:
+        subscribe_message = {
+            "APIKey": API_KEY,
+            # North Sea / English Channel — busy real shipping lanes,
+            # keeps ship count manageable instead of the whole world firehose.
+            "BoundingBoxes": [[[49, -2], [54, 9]]],
+        }
+        await ws.send(json.dumps(subscribe_message))
+
+        async for message in ws:
+            data = json.loads(message)
+            if data.get("MessageType") != "PositionReport":
+                continue
+
+            meta = data["MetaData"]
+            report = data["Message"]["PositionReport"]
+            mmsi = meta["MMSI"]
+
+            live_ships[mmsi] = {
+                "name": (meta.get("ShipName") or "Unknown").strip(),
+                "lat": meta["latitude"],
+                "lng": meta["longitude"],
+                "type": "Vessel",
+                "status": STATUS_MAP.get(report.get("NavigationalStatus"), "anchored-sea"),
+                "speed": report.get("Sog"),
+                "heading": report.get("Cog"),
+            }
+
+async def ais_background_loop():
+    # The connection will eventually drop on its own — reconnect
+    # automatically instead of the feed silently dying forever.
+    while True:
+        try:
+            await listen_to_ais()
+        except Exception as e:
+            print(f"AIS connection dropped, reconnecting in 5s: {e}")
+            await asyncio.sleep(5)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Starts the AIS listener once, when the server boots, running
+    # alongside normal request handling for the server's whole lifetime.
+    task = asyncio.create_task(ais_background_loop())
+    yield
+    task.cancel()
+
+app = FastAPI(lifespan=lifespan)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -14,29 +78,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ships = [
-    {
-        "name": "MV Pacific Glory", "lat": 1.5, "lng": 104.1, "type": "Container Ship",
-        "flag": "Panama", "operator": "Maersk Line", "buildYear": 2015,
-        "origin": "Shanghai", "destination": "Rotterdam", "status": "moving",
-    },
-    {
-        "name": "MV Atlas", "lat": 51.95, "lng": 4.14, "type": "Tanker",
-        "flag": "Liberia", "operator": "MSC", "buildYear": 2018,
-        "origin": "Jebel Ali", "destination": "Singapore", "status": "anchored-port",
-    },
-    {
-        "name": "MV Northern Star", "lat": 29.97, "lng": 32.55, "type": "Bulk Carrier",
-        "flag": "Marshall Islands", "operator": "COSCO Shipping", "buildYear": 2012,
-        "origin": "Mumbai", "destination": "Hamburg", "status": "anchored-sea",
-    },
-    {
-        "name": "MV Ocean Pioneer", "lat": 25.3, "lng": 55.4, "type": "Passenger Ship",
-        "flag": "Malta", "operator": "Star Bulk", "buildYear": 2020,
-        "origin": "Piraeus", "destination": "Busan", "status": "anchored-port",
-    },
-]
-
 @app.get("/ships")
 def get_ships():
-    return ships 
+    return list(live_ships.values())
