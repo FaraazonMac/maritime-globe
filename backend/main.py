@@ -1,6 +1,8 @@
 import asyncio
 import json
 import os
+from datetime import datetime, timezone
+from dark_fleet import flag_dark_ships
 from contextlib import asynccontextmanager
 
 import websockets
@@ -49,6 +51,7 @@ async def listen_to_ais():
                 "status": STATUS_MAP.get(report.get("NavigationalStatus"), "anchored-sea"),
                 "speed": report.get("Sog"),
                 "heading": report.get("Cog"),
+                "last_seen": datetime.now(timezone.utc),
             }
 
 async def ais_background_loop():
@@ -80,4 +83,9 @@ app.add_middleware(
 
 @app.get("/ships")
 def get_ships():
-    return list(live_ships.values())
+    return flag_dark_ships(list(live_ships.values()))
+
+@app.get("/ships/dark-fleet")
+def get_dark_fleet():
+    all_ships = flag_dark_ships(list(live_ships.values()))
+    return [s for s in all_ships if s["is_dark_flagged"]]
