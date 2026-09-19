@@ -230,6 +230,101 @@ const dryDocks = [
   { name: 'Sumitomo Heavy Industries – Yokosuka', lat: 35.30, lng: 139.67, kind: 'drydock', country: 'Japan', note: 'Major Japanese dry-dock repair and shipbuilding yard.' },
   { name: 'New Times Shipyard – Jingjiang', lat: 32.02, lng: 120.27, kind: 'drydock', country: 'China', note: 'Large Yangtze River dry-dock shipbuilding complex.' },
 ]
+const shipyards = [
+  { name: 'Hyundai Heavy Industries – Ulsan', lat: 35.50, lng: 129.38, kind: 'shipyard', country: 'South Korea', note: "World's largest shipbuilding facility by output." },
+  { name: 'Samsung Heavy Industries – Geoje', lat: 34.81, lng: 128.62, kind: 'shipyard', country: 'South Korea', note: 'Major builder of LNG carriers, drillships, and offshore platforms.' },
+  { name: 'Hanwha Ocean (Daewoo) – Geoje', lat: 34.83, lng: 128.70, kind: 'shipyard', country: 'South Korea', note: 'Top global builder of LNG carriers and naval vessels.' },
+  { name: 'Hyundai Heavy Industries – Gunsan', lat: 35.97, lng: 126.68, kind: 'shipyard', country: 'South Korea', note: 'Ten 700m dry docks for vessels of any size.' },
+  { name: 'Hyundai Samho Heavy Industries', lat: 34.68, lng: 126.44, kind: 'shipyard', country: 'South Korea', note: 'One of the largest shipbuilding complexes globally.' },
+  { name: 'HD Hyundai Mipo Dockyard', lat: 35.49, lng: 129.39, kind: 'shipyard', country: 'South Korea', note: "One of the world's leading mid-size vessel and tanker builders." },
+  { name: 'HJ Shipbuilding & Construction (formerly Hanjin)', lat: 35.10, lng: 129.03, kind: 'shipyard', country: 'South Korea', note: 'Major Busan-based commercial and naval shipbuilder.' },
+  { name: 'Sungdong Shipbuilding – Tongyeong', lat: 34.85, lng: 128.43, kind: 'shipyard', country: 'South Korea', note: 'Major South Korean mid-size tanker and bulk carrier builder.' },
+  { name: 'STX Offshore & Shipbuilding – Jinhae', lat: 35.15, lng: 128.68, kind: 'shipyard', country: 'South Korea', note: 'Major South Korean commercial vessel builder.' },
+  { name: 'Jiangnan Shipyard – Shanghai', lat: 31.20, lng: 121.79, kind: 'shipyard', country: 'China', note: "China's oldest and one of its largest shipyards." },
+  { name: 'Waigaoqiao Shipbuilding – Shanghai', lat: 31.35, lng: 121.62, kind: 'shipyard', country: 'China', note: 'Major bulk carrier and tanker construction yard under CSSC.' },
+  { name: 'Dalian Shipbuilding Industry Co.', lat: 38.93, lng: 121.63, kind: 'shipyard', country: 'China', note: 'Major shipbuilding and repair yard on the Bohai Sea.' },
+  { name: 'New Times Shipyard – Jingjiang', lat: 32.02, lng: 120.27, kind: 'shipyard', country: 'China', note: 'Large Yangtze River shipbuilding complex.' },
+  { name: 'Guangzhou Shipyard International', lat: 23.10, lng: 113.42, kind: 'shipyard', country: 'China', note: 'Major South China shipbuilder for commercial and offshore vessels.' },
+  { name: 'Yangzijiang Shipbuilding', lat: 32.02, lng: 120.27, kind: 'shipyard', country: 'China', note: "One of China's largest private shipbuilders." },
+  { name: 'CSSC Wuchang Shipbuilding', lat: 30.55, lng: 114.30, kind: 'shipyard', country: 'China', note: 'Historic Yangtze River shipyard, now a major naval and commercial builder.' },
+  { name: 'Jinling Shipyard – Nanjing', lat: 32.06, lng: 118.80, kind: 'shipyard', country: 'China', note: "One of China's leading tanker and chemical carrier builders." },
+  { name: 'Nantong COSCO KHI Ship Engineering', lat: 32.08, lng: 120.86, kind: 'shipyard', country: 'China', note: 'Major China-Japan joint-venture shipyard.' },
+  { name: 'China Merchants Industry Shipyard – Shenzhen', lat: 22.47, lng: 113.88, kind: 'shipyard', country: 'China', note: 'Major South China shipbuilder and offshore fabricator.' },
+  { name: 'Huangpu Wenchong Shipbuilding', lat: 23.10, lng: 113.47, kind: 'shipyard', country: 'China', note: 'Major Guangzhou-area naval and commercial shipbuilder.' },
+  { name: 'Cosco Shipping Heavy Industry – Qidong', lat: 31.80, lng: 121.66, kind: 'shipyard', country: 'China', note: 'Large Yangtze estuary shipbuilding complex.' },
+  { name: 'Fujian Southeast Shipyard', lat: 24.98, lng: 118.68, kind: 'shipyard', country: 'China', note: 'Major mid-size vessel builder on the Taiwan Strait coast.' },
+  { name: 'Mitsubishi Heavy Industries – Nagasaki', lat: 32.75, lng: 129.87, kind: 'shipyard', country: 'Japan', note: 'Historic shipyard building large commercial vessels and ferries.' },
+  { name: 'Imabari Shipbuilding – Ehime', lat: 34.07, lng: 132.99, kind: 'shipyard', country: 'Japan', note: "Japan's largest shipbuilder by tonnage." },
+  { name: 'Japan Marine United – Yokohama', lat: 35.44, lng: 139.65, kind: 'shipyard', country: 'Japan', note: 'Major merged shipbuilder formed from IHI and Universal Shipbuilding.' },
+  { name: 'Sumitomo Heavy Industries – Yokosuka', lat: 35.30, lng: 139.67, kind: 'shipyard', country: 'Japan', note: 'Major Japanese shipbuilding and repair yard.' },
+  { name: 'Tsuneishi Shipbuilding', lat: 34.36, lng: 133.32, kind: 'shipyard', country: 'Japan', note: "One of Japan's largest bulk carrier builders." },
+  { name: 'Oshima Shipbuilding', lat: 32.83, lng: 129.98, kind: 'shipyard', country: 'Japan', note: 'Major Japanese builder of bulk carriers and tankers.' },
+  { name: 'Onomichi Shipbuilding (Japan Marine United)', lat: 34.41, lng: 133.20, kind: 'shipyard', country: 'Japan', note: 'Key Japanese mid-size commercial shipbuilder.' },
+  { name: 'CSBC Kaohsiung Shipyard', lat: 22.58, lng: 120.28, kind: 'shipyard', country: 'Taiwan', note: "Home to one of the world's largest dry docks." },
+  { name: 'Cochin Shipyard – Kochi', lat: 9.95, lng: 76.27, kind: 'shipyard', country: 'India', note: "India's largest shipyard." },
+  { name: 'Hindustan Shipyard – Visakhapatnam', lat: 17.68, lng: 83.22, kind: 'shipyard', country: 'India', note: "India's oldest and largest defense/commercial shipyard on the east coast." },
+  { name: 'Mazagon Dock – Mumbai', lat: 18.95, lng: 72.85, kind: 'shipyard', country: 'India', note: "One of India's premier shipbuilding yards." },
+  { name: 'Larsen & Toubro Shipyard – Kattupalli', lat: 13.29, lng: 80.32, kind: 'shipyard', country: 'India', note: "One of India's most modern shipbuilding facilities." },
+  { name: 'Goa Shipyard Limited', lat: 15.40, lng: 73.83, kind: 'shipyard', country: 'India', note: 'Major Indian naval and commercial shipbuilder on the west coast.' },
+  { name: 'Garden Reach Shipbuilders – Kolkata', lat: 22.54, lng: 88.31, kind: 'shipyard', country: 'India', note: "One of India's oldest shipyards, on the Hooghly River." },
+  { name: 'HD Hyundai Subic Shipyard', lat: 14.79, lng: 120.28, kind: 'shipyard', country: 'Philippines', note: 'One of the largest shipyards in Southeast Asia.' },
+  { name: 'Damen Shipyards – Vietnam (Song Cam)', lat: 20.85, lng: 106.73, kind: 'shipyard', country: 'Vietnam', note: 'Major Southeast Asian yard building tankers and offshore vessels.' },
+  { name: 'Vard Vung Tau', lat: 10.35, lng: 107.08, kind: 'shipyard', country: 'Vietnam', note: 'Major offshore support vessel yard, part of the Vard/Fincantieri group.' },
+  { name: 'Sembcorp Marine – Tuas', lat: 1.32, lng: 103.64, kind: 'shipyard', country: 'Singapore', note: "One of the world's leading offshore rig and specialized vessel builders." },
+  { name: 'Keppel Shipyard – Singapore (Shipbuilding Division)', lat: 1.29, lng: 103.65, kind: 'shipyard', country: 'Singapore', note: 'Major offshore rig and specialized vessel construction yard.' },
+  { name: 'PaxOcean Shipyard – Batam', lat: 1.13, lng: 104.05, kind: 'shipyard', country: 'Indonesia', note: 'Major offshore vessel and rig fabrication yard near Singapore.' },
+  { name: 'ASRY – Bahrain', lat: 26.20, lng: 50.61, kind: 'shipyard', country: 'Bahrain', note: "One of the Middle East's largest ship repair and building yards." },
+  { name: 'Abu Dhabi Ship Building (ADSB)', lat: 24.42, lng: 54.47, kind: 'shipyard', country: 'UAE', note: "One of the UAE's principal naval and commercial shipbuilders." },
+  { name: 'Lamprell – Hamriyah', lat: 25.42, lng: 55.46, kind: 'shipyard', country: 'UAE', note: 'Major fabricator of offshore rigs and specialized marine vessels.' },
+  { name: 'Tuzla Shipyards Zone – Istanbul', lat: 40.82, lng: 29.35, kind: 'shipyard', country: 'Turkey', note: "Turkey's principal shipbuilding hub, home to dozens of yards." },
+  { name: 'RMK Marine – Tuzla', lat: 40.82, lng: 29.36, kind: 'shipyard', country: 'Turkey', note: 'Major Turkish builder of naval and commercial vessels.' },
+  { name: 'Karachi Shipyard & Engineering Works', lat: 24.85, lng: 66.98, kind: 'shipyard', country: 'Pakistan', note: "Pakistan's principal naval and commercial shipbuilding yard." },
+  { name: 'Chittagong Dry Dock Limited', lat: 22.31, lng: 91.79, kind: 'shipyard', country: 'Bangladesh', note: "Bangladesh's leading state-owned shipbuilding and repair yard." },
+  { name: 'Colombo Dockyard – Shipbuilding Division', lat: 6.95, lng: 79.85, kind: 'shipyard', country: 'Sri Lanka', note: 'Major South Asian commercial vessel builder and repairer.' },
+  { name: 'Fincantieri – Monfalcone', lat: 45.79, lng: 13.53, kind: 'shipyard', country: 'Italy', note: "One of Europe's largest cruise-ship-building shipyards." },
+  { name: 'Fincantieri – Marghera', lat: 45.48, lng: 12.24, kind: 'shipyard', country: 'Italy', note: 'Major Venice-area shipyard for cruise vessel construction.' },
+  { name: 'Fincantieri – Ancona', lat: 43.60, lng: 13.51, kind: 'shipyard', country: 'Italy', note: 'Major Italian cruise ship construction site.' },
+  { name: 'Fincantieri – Castellammare di Stabia', lat: 40.70, lng: 14.48, kind: 'shipyard', country: 'Italy', note: 'Historic Italian shipbuilding yard near Naples.' },
+  { name: 'Meyer Werft – Papenburg', lat: 53.07, lng: 7.40, kind: 'shipyard', country: 'Germany', note: 'Leading cruise ship builder on the Ems river.' },
+  { name: 'Thyssenkrupp Marine Systems – Kiel', lat: 54.32, lng: 10.14, kind: 'shipyard', country: 'Germany', note: 'Major German naval and commercial shipbuilder.' },
+  { name: 'Blohm+Voss – Hamburg', lat: 53.54, lng: 9.96, kind: 'shipyard', country: 'Germany', note: 'Historic German shipyard, now focused on repair and superyachts.' },
+  { name: 'Lloyd Werft – Bremerhaven', lat: 53.53, lng: 8.58, kind: 'shipyard', country: 'Germany', note: 'Major German cruise ship repair and conversion yard.' },
+  { name: 'Nordic Yards – Wismar', lat: 53.90, lng: 11.47, kind: 'shipyard', country: 'Germany', note: 'Former MTW Schiffswerft yard on the Baltic, specialty vessel construction.' },
+  { name: "Chantiers de l'Atlantique – Saint-Nazaire", lat: 47.28, lng: -2.20, kind: 'shipyard', country: 'France', note: 'Home to one of the largest dry docks in the world.' },
+  { name: 'Naval Group – Lorient', lat: 47.75, lng: -3.37, kind: 'shipyard', country: 'France', note: "France's principal naval shipbuilding yard." },
+  { name: 'STX France – Saint-Nazaire', lat: 47.28, lng: -2.20, kind: 'shipyard', country: 'France', note: 'Major French cruise and naval vessel construction site.' },
+  { name: 'Navantia – Ferrol', lat: 43.48, lng: -8.24, kind: 'shipyard', country: 'Spain', note: 'Major Spanish naval and commercial shipbuilding yard.' },
+  { name: 'Astilleros Gondan', lat: 43.55, lng: -6.38, kind: 'shipyard', country: 'Spain', note: 'Spanish builder of specialty and research vessels.' },
+  { name: 'Freire Shipyard – Vigo', lat: 42.24, lng: -8.72, kind: 'shipyard', country: 'Spain', note: 'Major Spanish fishing and specialty vessel builder.' },
+  { name: 'Damen Shipyards – Gorinchem', lat: 51.83, lng: 4.98, kind: 'shipyard', country: 'Netherlands', note: 'Headquarters yard of the major Damen Group shipbuilding network.' },
+  { name: 'Damen Shipyards – Schelde', lat: 51.45, lng: 3.83, kind: 'shipyard', country: 'Netherlands', note: 'Major Dutch naval and commercial shipbuilder.' },
+  { name: 'Damen Shipyards Bergum', lat: 53.20, lng: 6.00, kind: 'shipyard', country: 'Netherlands', note: 'Specialty inland vessel builder, part of the Damen Group.' },
+  { name: 'Uljanik Shipyard – Pula', lat: 44.87, lng: 13.85, kind: 'shipyard', country: 'Croatia', note: 'Historic Adriatic shipyard, one of the oldest in Europe.' },
+  { name: 'Remontowa Shipyard – Gdańsk', lat: 54.36, lng: 18.67, kind: 'shipyard', country: 'Poland', note: "One of Europe's largest ship repair and conversion yards." },
+  { name: 'Crist Shipyard – Gdynia', lat: 54.53, lng: 18.55, kind: 'shipyard', country: 'Poland', note: 'Major Baltic shipbuilder, known for offshore wind vessels.' },
+  { name: 'Meyer Turku', lat: 60.42, lng: 22.18, kind: 'shipyard', country: 'Finland', note: 'Leading cruise ship builder, part of the Meyer Group.' },
+  { name: 'Wärtsilä Shipyard – Turku (historic)', lat: 60.42, lng: 22.18, kind: 'shipyard', country: 'Finland', note: 'Historic Finnish shipbuilding site, precursor to modern Meyer Turku.' },
+  { name: 'Ulstein Verft', lat: 62.35, lng: 5.85, kind: 'shipyard', country: 'Norway', note: 'Innovative Norwegian builder of offshore and specialty vessels.' },
+  { name: 'Vard Group – Søviknes', lat: 62.68, lng: 6.80, kind: 'shipyard', country: 'Norway', note: 'Major Norwegian builder of offshore support and specialty vessels.' },
+  { name: 'Harland & Wolff – Belfast', lat: 54.61, lng: -5.90, kind: 'shipyard', country: 'UK', note: "Historic shipyard that built the Titanic, still active in repair and fabrication." },
+  { name: 'Babcock Marine – Rosyth', lat: 56.03, lng: -3.44, kind: 'shipyard', country: 'UK', note: "One of the UK's principal naval shipbuilding and refit yards." },
+  { name: 'Elefsis Shipyards', lat: 38.04, lng: 23.54, kind: 'shipyard', country: 'Greece', note: "One of Greece's major shipyards." },
+  { name: 'Zvezda Shipbuilding Complex', lat: 43.11, lng: 132.15, kind: 'shipyard', country: 'Russia', note: "Russia's largest and most modern shipyard." },
+  { name: 'Severnaya Verf – St. Petersburg', lat: 59.87, lng: 30.19, kind: 'shipyard', country: 'Russia', note: 'Major Russian Baltic shipbuilding yard.' },
+  { name: 'Admiralty Shipyards – St. Petersburg', lat: 59.92, lng: 30.28, kind: 'shipyard', country: 'Russia', note: "One of Russia's oldest and largest shipbuilding yards." },
+  { name: 'Vard Braila', lat: 45.27, lng: 27.98, kind: 'shipyard', country: 'Romania', note: 'Major Romanian shipyard on the Danube, part of the Vard/Fincantieri group.' },
+  { name: 'Damen Shipyards Mangalia', lat: 43.81, lng: 28.58, kind: 'shipyard', country: 'Romania', note: "One of the largest shipyards on the Black Sea." },
+  { name: 'Damen Shipyards Galați', lat: 45.44, lng: 28.03, kind: 'shipyard', country: 'Romania', note: 'Major Danube River shipbuilding yard.' },
+  { name: 'Newport News Shipbuilding', lat: 36.98, lng: -76.43, kind: 'shipyard', country: 'USA', note: 'Major US shipbuilder, historically significant for large vessels.' },
+  { name: 'Bath Iron Works', lat: 43.90, lng: -69.82, kind: 'shipyard', country: 'USA', note: 'Historic Maine shipyard, primarily naval construction.' },
+  { name: 'Halifax Shipyard', lat: 44.66, lng: -63.58, kind: 'shipyard', country: 'Canada', note: "Canada's principal large-vessel shipbuilding yard." },
+  { name: 'ASMAR Shipyards – Talcahuano', lat: -36.72, lng: -73.12, kind: 'shipyard', country: 'Chile', note: "Chile's principal naval and commercial shipyard." },
+  { name: 'Estaleiro Atlântico Sul – Pernambuco', lat: -8.30, lng: -34.93, kind: 'shipyard', country: 'Brazil', note: "One of Brazil's largest modern shipyards, built for offshore/oil vessels." },
+  { name: 'Astillero Río Santiago', lat: -34.85, lng: -57.90, kind: 'shipyard', country: 'Argentina', note: "Argentina's oldest and largest state shipyard." },
+  { name: 'Alexandria Shipyard', lat: 31.20, lng: 29.88, kind: 'shipyard', country: 'Egypt', note: 'Major shipyard near the Suez Canal.' },
+  { name: 'Damen Shipyards Cape Town', lat: -33.90, lng: 18.43, kind: 'shipyard', country: 'South Africa', note: 'Major Southern Hemisphere shipbuilding and repair facility.' },
+]
+
 
 const wetDocks = [
   { name: 'Royal Albert Dock – London', lat: 51.508, lng: 0.056, kind: 'wetdock', country: 'UK', note: 'Historic enclosed wet dock on the Thames, once part of the busiest port complex in the world.' },
@@ -252,6 +347,69 @@ const kindLabels = {
   bunker: 'Bunkering Station',
   drydock: 'Dry Dock',
   wetdock: 'Wet Dock',
+  congestion: 'Port Congestion (Live)',
+}
+
+
+const COUNTRY_NAMES = {
+  AD: 'Andorra', AE: 'United Arab Emirates', AF: 'Afghanistan', AG: 'Antigua and Barbuda', AI: 'Anguilla',
+  AL: 'Albania', AM: 'Armenia', AO: 'Angola', AQ: 'Antarctica', AR: 'Argentina', AS: 'American Samoa',
+  AT: 'Austria', AU: 'Australia', AW: 'Aruba', AX: 'Åland Islands', AZ: 'Azerbaijan',
+  BA: 'Bosnia and Herzegovina', BB: 'Barbados', BD: 'Bangladesh', BE: 'Belgium', BF: 'Burkina Faso',
+  BG: 'Bulgaria', BH: 'Bahrain', BI: 'Burundi', BJ: 'Benin', BL: 'Saint Barthélemy', BM: 'Bermuda',
+  BN: 'Brunei', BO: 'Bolivia', BQ: 'Bonaire, Sint Eustatius and Saba', BR: 'Brazil', BS: 'Bahamas',
+  BT: 'Bhutan', BV: 'Bouvet Island', BW: 'Botswana', BY: 'Belarus', BZ: 'Belize',
+  CA: 'Canada', CC: 'Cocos Islands', CD: 'DR Congo', CF: 'Central African Republic', CG: 'Congo',
+  CH: 'Switzerland', CI: "Côte d'Ivoire", CK: 'Cook Islands', CL: 'Chile', CM: 'Cameroon', CN: 'China',
+  CO: 'Colombia', CR: 'Costa Rica', CU: 'Cuba', CV: 'Cabo Verde', CW: 'Curaçao', CX: 'Christmas Island',
+  CY: 'Cyprus', CZ: 'Czechia',
+  DE: 'Germany', DJ: 'Djibouti', DK: 'Denmark', DM: 'Dominica', DO: 'Dominican Republic', DZ: 'Algeria',
+  EC: 'Ecuador', EE: 'Estonia', EG: 'Egypt', EH: 'Western Sahara', ER: 'Eritrea', ES: 'Spain', ET: 'Ethiopia',
+  FI: 'Finland', FJ: 'Fiji', FK: 'Falkland Islands', FM: 'Micronesia', FO: 'Faroe Islands', FR: 'France',
+  GA: 'Gabon', GB: 'United Kingdom', GD: 'Grenada', GE: 'Georgia', GF: 'French Guiana', GG: 'Guernsey',
+  GH: 'Ghana', GI: 'Gibraltar', GL: 'Greenland', GM: 'Gambia', GN: 'Guinea', GP: 'Guadeloupe',
+  GQ: 'Equatorial Guinea', GR: 'Greece', GS: 'South Georgia', GT: 'Guatemala', GU: 'Guam',
+  GW: 'Guinea-Bissau', GY: 'Guyana',
+  HK: 'Hong Kong', HM: 'Heard Island', HN: 'Honduras', HR: 'Croatia', HT: 'Haiti', HU: 'Hungary',
+  ID: 'Indonesia', IE: 'Ireland', IL: 'Israel', IM: 'Isle of Man', IN: 'India',
+  IO: 'British Indian Ocean Territory', IQ: 'Iraq', IR: 'Iran', IS: 'Iceland', IT: 'Italy',
+  JE: 'Jersey', JM: 'Jamaica', JO: 'Jordan', JP: 'Japan',
+  KE: 'Kenya', KG: 'Kyrgyzstan', KH: 'Cambodia', KI: 'Kiribati', KM: 'Comoros', KN: 'Saint Kitts and Nevis',
+  KP: 'North Korea', KR: 'South Korea', KW: 'Kuwait', KY: 'Cayman Islands', KZ: 'Kazakhstan',
+  LA: 'Laos', LB: 'Lebanon', LC: 'Saint Lucia', LI: 'Liechtenstein', LK: 'Sri Lanka', LR: 'Liberia',
+  LS: 'Lesotho', LT: 'Lithuania', LU: 'Luxembourg', LV: 'Latvia', LY: 'Libya',
+  MA: 'Morocco', MC: 'Monaco', MD: 'Moldova', ME: 'Montenegro', MF: 'Saint Martin', MG: 'Madagascar',
+  MH: 'Marshall Islands', MK: 'North Macedonia', ML: 'Mali', MM: 'Myanmar', MN: 'Mongolia', MO: 'Macao',
+  MP: 'Northern Mariana Islands', MQ: 'Martinique', MR: 'Mauritania', MS: 'Montserrat', MT: 'Malta',
+  MU: 'Mauritius', MV: 'Maldives', MW: 'Malawi', MX: 'Mexico', MY: 'Malaysia', MZ: 'Mozambique',
+  NA: 'Namibia', NC: 'New Caledonia', NE: 'Niger', NF: 'Norfolk Island', NG: 'Nigeria', NI: 'Nicaragua',
+  NL: 'Netherlands', NO: 'Norway', NP: 'Nepal', NR: 'Nauru', NU: 'Niue', NZ: 'New Zealand',
+  OM: 'Oman',
+  PA: 'Panama', PE: 'Peru', PF: 'French Polynesia', PG: 'Papua New Guinea', PH: 'Philippines',
+  PK: 'Pakistan', PL: 'Poland', PM: 'Saint Pierre and Miquelon', PN: 'Pitcairn Islands',
+  PR: 'Puerto Rico', PS: 'Palestine', PT: 'Portugal', PW: 'Palau', PY: 'Paraguay',
+  QA: 'Qatar',
+  RE: 'Réunion', RO: 'Romania', RS: 'Serbia', RU: 'Russia', RW: 'Rwanda',
+  SA: 'Saudi Arabia', SB: 'Solomon Islands', SC: 'Seychelles', SD: 'Sudan', SE: 'Sweden', SG: 'Singapore',
+  SH: 'Saint Helena', SI: 'Slovenia', SJ: 'Svalbard and Jan Mayen', SK: 'Slovakia', SL: 'Sierra Leone',
+  SM: 'San Marino', SN: 'Senegal', SO: 'Somalia', SR: 'Suriname', SS: 'South Sudan',
+  ST: 'São Tomé and Príncipe', SV: 'El Salvador', SX: 'Sint Maarten', SY: 'Syria', SZ: 'Eswatini',
+  TC: 'Turks and Caicos Islands', TD: 'Chad', TF: 'French Southern Territories', TG: 'Togo',
+  TH: 'Thailand', TJ: 'Tajikistan', TK: 'Tokelau', TL: 'Timor-Leste', TM: 'Turkmenistan', TN: 'Tunisia',
+  TO: 'Tonga', TR: 'Turkey', TT: 'Trinidad and Tobago', TV: 'Tuvalu', TW: 'Taiwan', TZ: 'Tanzania',
+  UA: 'Ukraine', UG: 'Uganda', UM: 'United States Minor Outlying Islands', US: 'United States',
+  UY: 'Uruguay', UZ: 'Uzbekistan',
+  VA: 'Vatican City', VC: 'Saint Vincent and the Grenadines', VE: 'Venezuela', VG: 'British Virgin Islands',
+  VI: 'United States Virgin Islands', VN: 'Vietnam', VU: 'Vanuatu',
+  WF: 'Wallis and Futuna', WS: 'Samoa',
+  YE: 'Yemen', YT: 'Mayotte',
+  ZA: 'South Africa', ZM: 'Zambia', ZW: 'Zimbabwe',
+}
+
+function countryName(code) {
+  if (!code) return null
+  const upper = code.trim().toUpperCase()
+  return COUNTRY_NAMES[upper] || code
 }
 
 const waterBodies = [
@@ -387,6 +545,28 @@ function bearingCompass(lat1, lng1, lat2, lng2) {
   return directions[Math.round(bearing / 22.5) % 16]
 }
 
+function computeCongestion(port, ships) {
+  const nearby = ships.filter((s) => {
+    if (s.status === 'moving') return false
+    return haversineKm(port.lat, port.lng, s.lat, s.lng) <= 15
+  })
+  const count = nearby.length
+  const docked = nearby.filter((s) => s.status === 'anchored-port').length
+  const level = count >= 6 ? 'high' : count >= 3 ? 'medium' : 'low'
+  return { count, level, docked }
+}
+
+function sortedByDistance(list, ship) {
+  if (!list || !list.length || !ship) return []
+  return list
+    .map((item) => ({
+      ...item,
+      distanceKm: haversineKm(ship.lat, ship.lng, item.lat, item.lng),
+      direction: bearingCompass(ship.lat, ship.lng, item.lat, item.lng),
+    }))
+    .sort((a, b) => a.distanceKm - b.distanceKm)
+}
+
 function nearestOf(list, ship) {
   if (!list || !list.length || !ship) return null
   let best = null
@@ -398,7 +578,7 @@ function nearestOf(list, ship) {
       best = item
     }
   }
-    if (!best) return null
+  if (!best) return null
   return {
     ...best,
     distanceKm: bestDist,
@@ -489,9 +669,14 @@ function App() {
   const [rivers, setRivers] = useState([])
   const [riverLabels, setRiverLabels] = useState([])
   const [ports, setPorts] = useState([])
-  const [shipyards, setShipyards] = useState([])
   const [shipWeather, setShipWeather] = useState(null)
   const [weatherError, setWeatherError] = useState(false)
+  const [portRank, setPortRank] = useState(0)
+  const [chatOpen, setChatOpen] = useState(false)
+  const [chatInput, setChatInput] = useState('')
+  const [chatMessages, setChatMessages] = useState([])
+  const [chatLoading, setChatLoading] = useState(false)
+  const [highlightedShipNames, setHighlightedShipNames] = useState([])
   const [visibleLayers, setVisibleLayers] = useState({
     port: false,
     lighthouse: false,
@@ -500,6 +685,7 @@ function App() {
     bunker: false,
     drydock: false,
     wetdock: false,
+    congestion: false,
   })
 
   useEffect(() => {
@@ -587,43 +773,34 @@ function App() {
   }, [])
 
   useEffect(() => {
-    function fetchOverpass(query, onSuccess, attempt) {
-      const currentAttempt = attempt || 1
-      fetch('https://overpass.kumi.systems/api/interpreter', {
-        method: 'POST',
-        body: query,
+    setPortRank(0)
+  }, [selectedShip])
+
+  function sendChatMessage() {
+    const question = chatInput.trim()
+    if (!question || chatLoading) return
+
+    setChatMessages((prev) => [...prev, { role: 'user', text: question }])
+    setChatInput('')
+    setChatLoading(true)
+
+    fetch('http://127.0.0.1:8000/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: question }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setChatMessages((prev) => [...prev, { role: 'assistant', text: data.reply }])
+        const names = (data.ships || []).map((s) => s.name)
+        const isPartial = (data.count ?? names.length) > names.length
+        setHighlightedShipNames(isPartial ? [] : names)
       })
-        .then((res) => {
-          if (!res.ok) throw new Error('Overpass request failed')
-          return res.json()
-        })
-        .then((data) => onSuccess(data.elements || []))
-        .catch((err) => {
-          if (currentAttempt < 3) {
-            console.warn('Overpass attempt ' + currentAttempt + ' failed, retrying...', err)
-            setTimeout(() => fetchOverpass(query, onSuccess, currentAttempt + 1), 2000)
-          } else {
-            console.error('Overpass fetch failed after 3 attempts:', err)
-          }
-        })
-    }
-
-    const toMarker = (el, kind) => {
-      const lat = el.lat ?? el.center?.lat
-      const lng = el.lon ?? el.center?.lon
-      if (lat == null || lng == null) return null
-      const tags = el.tags || {}
-      const name = tags.name || tags['name:en'] || null
-      const note = tags.operator ? `Operated by ${tags.operator}.` : 'Source: OpenStreetMap contributors.'
-      return { name: name || `Unnamed ${kind}`, lat, lng, kind, country: null, note }
-    }
-
-    fetchOverpass(
-      '[out:json][timeout:25];(node["industrial"="shipyard"];way["industrial"="shipyard"];);out center tags;',
-      (elements) => setShipyards(elements.map((el) => toMarker(el, 'shipyard')).filter(Boolean))
-    )
-  }, [])
-
+      .catch(() => {
+        setChatMessages((prev) => [...prev, { role: 'assistant', text: 'Something went wrong reaching the chat backend.' }])
+      })
+      .finally(() => setChatLoading(false))
+  }
   useEffect(() => {
     if (!selectedShip) {
       setShipWeather(null)
@@ -658,13 +835,15 @@ function App() {
     group.userData = d
 
     const shape = d.status === 'moving' ? 'arrow' : 'circle'
-    const isDimmed = selectedShip && d.name !== selectedShip.name
-    const material = new THREE.SpriteMaterial({
+    const isDimmed =
+      (selectedShip && d.name !== selectedShip.name) ||
+      (highlightedShipNames.length > 0 && !highlightedShipNames.includes(d.name))
+      const material = new THREE.SpriteMaterial({
       map: getShipTexture(shape, color),
       rotation: shape === 'arrow' ? THREE.MathUtils.degToRad(d.heading ?? 0) : 0,
       sizeAttenuation: false,
       transparent: true,
-      opacity: isDimmed ? 0.0005 : 1,
+      opacity: isDimmed ? 0.0001 : 1,
     })
     const sprite = new THREE.Sprite(material)
     sprite.userData = d
@@ -691,9 +870,21 @@ function App() {
   }
 
   const toggledMarkers = Object.entries(visibleLayers)
-    .filter(([, on]) => on)
+    .filter(([key, on]) => on && key !== 'congestion')
     .flatMap(([key]) => layerData[key])
 
+  const trackedPorts = ports.filter((p) => p.lat >= 49 && p.lat <= 54 && p.lng >= -2 && p.lng <= 9)
+  const portCongestionMarkers = visibleLayers.congestion
+    ? trackedPorts.map((p) => {
+        const { count, level } = computeCongestion(p, ships)
+        return { name: p.name, lat: p.lat, lng: p.lng, kind: 'congestion', level, count }
+      })
+    : []
+
+  const sortedPorts = selectedShip ? sortedByDistance(ports, selectedShip) : []
+  const candidatePort = sortedPorts[portRank] || null
+  const candidateCongestion = candidatePort ? computeCongestion(candidatePort, ships) : null
+  const visitedPorts = sortedPorts.slice(0, portRank + 1)
   const nearestPort = selectedShip ? nearestOf(ports, selectedShip) : null
   const nearestLighthouse = selectedShip ? nearestOf(lighthouses, selectedShip) : null
   const nearestShipyard = selectedShip ? nearestOf(shipyards, selectedShip) : null
@@ -703,13 +894,13 @@ function App() {
   const nearestWetdock = selectedShip ? nearestOf(wetDocks, selectedShip) : null
 
   const nearbyMarkers = [
-    nearestPort, nearestLighthouse, nearestShipyard,
+    ...visitedPorts, nearestLighthouse, nearestShipyard,
     nearestRecycling, nearestBunker,
     nearestDrydock, nearestWetdock,
   ].filter(Boolean)
 
   const seen = new Map()
-  for (const m of [...toggledMarkers, ...nearbyMarkers]) {
+  for (const m of [...toggledMarkers, ...nearbyMarkers, ...portCongestionMarkers]) {
     seen.set(`${m.name}-${m.lat}-${m.lng}`, m)
   }
   const facilityMarkers = Array.from(seen.values())
@@ -737,7 +928,7 @@ function App() {
         objectLng="lng"
         objectAltitude={0.001}
         objectThreeObject={buildShipMarker}
-        onObjectClick={(obj) => setSelectedShip(obj)}
+        onObjectClick={(obj) => { setSelectedShip(obj); setHighlightedShipNames([]) }}
         objectsTransitionDuration={0}
 
         htmlElementsData={[...facilityMarkers, ...textLabels]}
@@ -771,10 +962,30 @@ function App() {
             el.style.fontStyle = 'italic'
             el.style.fontSize = '8px'
             el.style.whiteSpace = 'nowrap'
+          } else if (d.kind === 'congestion') {
+            const color = d.level === 'high' ? '#ff3b3b' : d.level === 'medium' ? '#f0b429' : '#4caf6d'
+            el.title = `${d.name} — ${d.level} congestion (${d.count} ships)`
+            el.style.cursor = 'pointer'
+            el.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="${color}" stroke="#0a1420" stroke-width="1.5"/></svg>`
+            el.addEventListener('click', (e) => {
+              e.stopPropagation()
+              setSelectedFacility(d)
+            })
           } else {
             el.title = d.name
             el.style.cursor = 'pointer'
-            el.innerHTML = markerSVG(d.kind)
+                        const visitedIndex = d.kind === 'port'
+              ? visitedPorts.findIndex((p) => p.name === d.name && p.lat === d.lat && p.lng === d.lng)
+              : -1
+            if (visitedIndex !== -1) {
+              el.style.position = 'relative'
+              el.innerHTML = `
+                <div style="position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:-12px; font-size:10px; font-weight:600; color:#3fd9c7; font-family:'IBM Plex Mono', monospace; white-space:nowrap;">${visitedIndex + 1}</div>
+                ${markerSVG(d.kind)}
+              `
+            } else {
+              el.innerHTML = markerSVG(d.kind)
+            }
             el.addEventListener('click', (e) => {
               e.stopPropagation()
               setSelectedFacility(d)
@@ -790,7 +1001,7 @@ function App() {
         top: 20,
         left: 20,
         width: 220,
-        background: 'rgba(17, 30, 46, 0.85)',
+        background: '#0d1620',
         backdropFilter: 'blur(10px)',
         border: '1px solid rgba(63, 217, 199, 0.3)',
         borderRadius: 8,
@@ -810,6 +1021,7 @@ function App() {
           { key: 'bunker', label: 'Bunkering Stations' },
           { key: 'drydock', label: 'Dry Docks' },
           { key: 'wetdock', label: 'Wet Docks' },
+          { key: 'congestion', label: 'Port Congestion (Live)' },
         ].map((layer) => (
           <label key={layer.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, cursor: 'pointer' }}>
             <input
@@ -829,7 +1041,7 @@ function App() {
           top: 20,
           right: 20,
           width: 300,
-          background: 'rgba(17, 30, 46, 0.85)',
+          background: '#0d1620',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(63, 217, 199, 0.3)',
           borderLeft: `3px solid ${selectedShip.is_dark_flagged ? '#ff3b3b' : '#3fd9c7'}`,
@@ -910,10 +1122,58 @@ function App() {
           )}
 
           <div style={{ fontSize: 12, lineHeight: 1.6, borderTop: '1px solid rgba(63, 217, 199, 0.2)', paddingTop: 10 }}>
-            {nearestPort && (
+            {candidatePort && (
               <div style={{ marginBottom: 6 }}>
-                <span style={{ color: '#7f95a8' }}>Nearest Port: </span>
-                {nearestPort.name} ({nearestPort.distanceKm.toFixed(1)} km) towards {nearestPort.direction}
+                <div>
+                  <span style={{ color: '#7f95a8' }}>{portRank === 0 ? 'Nearest Port' : `Alternative Port #${portRank}`}: </span>
+                  {candidatePort.name} ({candidatePort.distanceKm.toFixed(1)} km) towards {candidatePort.direction}
+                </div>
+                {candidateCongestion && (
+                  <div style={{ marginTop: 2 }}>
+                    <span style={{ color: '#7f95a8' }}>Congestion: </span>
+                    <strong style={{
+                      color: candidateCongestion.level === 'high' ? '#ff3b3b' : candidateCongestion.level === 'medium' ? '#f0b429' : '#4caf6d',
+                      textTransform: 'uppercase',
+                    }}>
+                      {candidateCongestion.level}
+                    </strong>
+                    {' '}({candidateCongestion.count} anchored nearby, {candidateCongestion.docked} docked)
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                  {portRank > 0 && (
+                    <button
+                      onClick={() => setPortRank((r) => r - 1)}
+                      style={{
+                        background: 'rgba(63, 217, 199, 0.1)',
+                        border: '1px solid rgba(63, 217, 199, 0.4)',
+                        borderRadius: 4,
+                        color: '#3fd9c7',
+                        fontSize: 11,
+                        padding: '4px 8px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ← Previous port
+                    </button>
+                  )}
+                  {portRank < sortedPorts.length - 1 && (
+                    <button
+                      onClick={() => setPortRank((r) => r + 1)}
+                      style={{
+                        background: 'rgba(63, 217, 199, 0.1)',
+                        border: '1px solid rgba(63, 217, 199, 0.4)',
+                        borderRadius: 4,
+                        color: '#3fd9c7',
+                        fontSize: 11,
+                        padding: '4px 8px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Check another port →
+                    </button>
+                  )}
+                </div>
               </div>
             )}
             {nearestLighthouse && (
@@ -962,7 +1222,7 @@ function App() {
           bottom: 20,
           left: 20,
           width: 280,
-          background: 'rgba(17, 30, 46, 0.85)',
+          background: '#0d1620',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(63, 217, 199, 0.3)',
           borderLeft: '3px solid #3fd9c7',
@@ -997,10 +1257,36 @@ function App() {
 
           {selectedFacility.country && (
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, marginBottom: 10 }}>
-              <span style={{ color: '#7f95a8' }}>Country: </span>{selectedFacility.country}
+              <span style={{ color: '#7f95a8' }}>Country: </span>{countryName(selectedFacility.country)}
             </div>
           )}
-          {selectedFacility.note && (
+          {selectedFacility.kind === 'port' && (() => {
+            const { count, docked, level } = computeCongestion(selectedFacility, ships)
+            return (
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, lineHeight: 1.8, marginBottom: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Docked (live)</span><span>{docked}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Nearby traffic</span><span>{count} ships</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Congestion</span>
+                  <strong style={{
+                    color: level === 'high' ? '#ff3b3b' : level === 'medium' ? '#f0b429' : '#4caf6d',
+                    textTransform: 'uppercase',
+                  }}>{level}</strong>
+                </div>
+              </div>
+            )
+          })()}
+          {selectedFacility.kind === 'congestion' ? (
+            <p style={{ fontSize: 12, lineHeight: 1.5, color: '#c7d2dc', margin: 0 }}>
+              {selectedFacility.count} ship(s) currently anchored within 15km — classified as{' '}
+              <strong style={{ textTransform: 'uppercase' }}>{selectedFacility.level}</strong> congestion.
+              This is a live estimate from currently tracked AIS data, not a historical forecast.
+            </p>
+          ) : selectedFacility.note && (
             <p style={{ fontSize: 12, lineHeight: 1.5, color: '#c7d2dc', margin: 0 }}>
               {selectedFacility.note}
             </p>
@@ -1012,6 +1298,120 @@ function App() {
           )}
         </div>
       )}
+      {chatOpen && (
+        <div style={{
+          position: 'absolute',
+          bottom: 90,
+          right: 20,
+          width: 320,
+          height: 420,
+          background: '#0d1620',
+          border: '1px solid rgba(63, 217, 199, 0.3)',
+          borderRadius: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          fontFamily: "'IBM Plex Sans', system-ui, sans-serif",
+          boxShadow: '0 0 24px rgba(63, 217, 199, 0.15)',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            padding: '12px 16px',
+            borderBottom: '1px solid rgba(63, 217, 199, 0.2)',
+            color: '#3fd9c7',
+            fontSize: 13,
+            fontWeight: 600,
+            letterSpacing: '0.03em',
+            textTransform: 'uppercase',
+          }}>
+            Fleet Assistant
+          </div>
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: 12 }}>
+            {chatMessages.length === 0 && (
+              <p style={{ color: '#7f95a8', fontSize: 12, lineHeight: 1.5 }}>
+                Ask about the live fleet — e.g. "how many tankers are moving?" or "any ships flagged as dark fleet?"
+              </p>
+            )}
+            {chatMessages.map((m, i) => (
+              <div
+                key={i}
+                style={{
+                  marginBottom: 10,
+                  textAlign: m.role === 'user' ? 'right' : 'left',
+                }}
+              >
+                <div style={{
+                  display: 'inline-block',
+                  maxWidth: '85%',
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  lineHeight: 1.5,
+                  color: '#e8edf2',
+                  background: m.role === 'user' ? 'rgba(63, 217, 199, 0.15)' : 'rgba(127, 149, 168, 0.15)',
+                }}>
+                  {m.text}
+                </div>
+              </div>
+            ))}
+            {chatLoading && (
+              <p style={{ color: '#7f95a8', fontSize: 12 }}>Thinking...</p>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', borderTop: '1px solid rgba(63, 217, 199, 0.2)' }}>
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') sendChatMessage() }}
+              placeholder="Ask a question..."
+              style={{
+                flex: 1,
+                background: 'transparent',
+                border: 'none',
+                color: '#e8edf2',
+                padding: '10px 12px',
+                fontSize: 12,
+                outline: 'none',
+              }}
+            />
+            <button
+              onClick={sendChatMessage}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#3fd9c7',
+                padding: '0 14px',
+                cursor: 'pointer',
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      )}
+
+      <button
+        onClick={() => setChatOpen((o) => !o)}
+        style={{
+          position: 'absolute',
+          bottom: 20,
+          right: 20,
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          background: '#3fd9c7',
+          border: 'none',
+          fontSize: 22,
+          cursor: 'pointer',
+          boxShadow: '0 4px 12px rgba(63, 217, 199, 0.4)',
+        }}
+      >
+        {chatOpen ? '✕' : '💬'}
+      </button>
     </div>
   )
 }
