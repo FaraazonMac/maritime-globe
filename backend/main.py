@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 load_dotenv()
 API_KEY = os.getenv("AISSTREAM_API_KEY")
 
-# In-memory store: latest known position per ship, keyed by MMSI.
+# In-memory store: latest known info per ship, keyed by MMSI.
 # A background task keeps this updated forever; /ships just reads
 # whatever's currently in here at the moment it's asked.
 live_ships: dict[int, dict] = {}
@@ -23,6 +23,27 @@ STATUS_MAP = {
     4: "anchored-sea", 5: "anchored-port", 6: "anchored-sea", 7: "moving",
     8: "moving",
 }
+
+def map_ship_type(code):
+    # AIS ShipType is a numeric code in ranges, not a flat lookup table —
+    # e.g. every value 70-79 means some flavor of cargo ship.
+    if code is None:
+        return "unknown"
+    if 60 <= code <= 69:
+        return "passenger"
+    if 70 <= code <= 79:
+        return "cargo"
+    if 80 <= code <= 89:
+        return "tanker"
+    if code == 30:
+        return "fishing"
+    if code in (31, 32, 52):
+        return "tug"
+    if code == 36 or code == 37:
+        return "pleasure"
+    if code == 50 or code == 51 or code == 55:
+        return "official"
+    return "other"
 
 async def listen_to_ais():
     async with websockets.connect("wss://stream.aisstream.io/v0/stream") as ws:
@@ -36,23 +57,39 @@ async def listen_to_ais():
 
         async for message in ws:
             data = json.loads(message)
-            if data.get("MessageType") != "PositionReport":
-                continue
+            message_type = data.get("MessageType")
 
-            meta = data["MetaData"]
-            report = data["Message"]["PositionReport"]
-            mmsi = meta["MMSI"]
+            if message_type == "PositionReport":
+                meta = data["MetaData"]
+                report = data["Message"]["PositionReport"]
+                mmsi = meta["MMSI"]
 
-            live_ships[mmsi] = {
-                "name": (meta.get("ShipName") or "Unknown").strip(),
-                "lat": meta["latitude"],
-                "lng": meta["longitude"],
-                "type": "Vessel",
-                "status": STATUS_MAP.get(report.get("NavigationalStatus"), "anchored-sea"),
-                "speed": report.get("Sog"),
-                "heading": report.get("Cog"),
-                "last_seen": datetime.now(timezone.utc),
-            }
+                # Merge into whatever's already there for this ship
+                # (e.g. a vessel_type saved from a ShipStaticData message)
+                # instead of replacing the whole record.
+                existing = live_ships.get(mmsi, {})
+                live_ships[mmsi] = {
+                    **existing,
+                    "name": (meta.get("ShipName") or "Unknown").strip(),
+                    "lat": meta["latitude"],
+                    "lng": meta["longitude"],
+                    "type": "Vessel",
+                    "status": STATUS_MAP.get(report.get("NavigationalStatus"), "anchored-sea"),
+                    "speed": report.get("Sog"),
+                    "heading": report.get("Cog"),
+                    "last_seen": datetime.now(timezone.utc),
+                }
+
+            elif message_type == "ShipStaticData":
+                meta = data["MetaData"]
+                static = data["Message"]["ShipStaticData"]
+                mmsi = meta["MMSI"]
+
+                # Only attach vessel type to ships we've already seen a
+                # position for — no point creating a ship entry with a
+                # type but no location.
+                if mmsi in live_ships:
+                    live_ships[mmsi]["vessel_type"] = map_ship_type(static.get("Type"))
 
 async def ais_background_loop():
     # The connection will eventually drop on its own — reconnect
