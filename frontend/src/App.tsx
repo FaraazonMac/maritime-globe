@@ -529,6 +529,50 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
+function renderChatLine(line, keyPrefix) {
+  const parts = line.split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={`${keyPrefix}-${i}`}>{part.slice(2, -2)}</strong>
+    }
+    return part
+  })
+}
+
+function renderChatText(text) {
+  const lines = String(text).split('\n').filter((line) => line.trim() !== '')
+  return lines.map((line, i) => (
+    <div key={i} style={{ marginBottom: i < lines.length - 1 ? 4 : 0 }}>
+      {renderChatLine(line, i)}
+    </div>
+  ))
+}
+
+function degToCompass(deg) {
+  if (deg == null) return null
+  const directions = [
+    'north', 'north-northeast', 'northeast', 'east-northeast',
+    'east', 'east-southeast', 'southeast', 'south-southeast',
+    'south', 'south-southwest', 'southwest', 'west-southwest',
+    'west', 'west-northwest', 'northwest', 'north-northwest',
+  ]
+  return directions[Math.round(((deg % 360) + 360) % 360 / 22.5) % 16]
+}
+
+function weatherCodeToText(code) {
+  if (code == null) return null
+  if (code === 0) return 'clear sky'
+  if (code <= 3) return 'partly cloudy'
+  if (code <= 48) return 'fog'
+  if (code <= 57) return 'drizzle'
+  if (code <= 67) return 'rain'
+  if (code <= 77) return 'snow'
+  if (code <= 82) return 'rain showers'
+  if (code <= 86) return 'snow showers'
+  if (code >= 95) return 'thunderstorm'
+  return 'unsettled'
+}
+
 function bearingCompass(lat1, lng1, lat2, lng2) {
   const toRad = (d) => d * Math.PI / 180
   const y = Math.sin(toRad(lng2 - lng1)) * Math.cos(toRad(lat2))
@@ -812,17 +856,41 @@ function App() {
     setWeatherError(false)
 
     const { lat, lng } = selectedShip
-    fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lng}&hourly=wave_height,wind_wave_height&timezone=UTC`)
-      .then((res) => {
-        if (!res.ok) throw new Error('marine data unavailable')
-        return res.json()
+    let cancelled = false
+
+    Promise.allSettled([
+      fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lng}&current=wave_height,wave_direction,wave_period,swell_wave_height,sea_surface_temperature,ocean_current_velocity,ocean_current_direction&timezone=UTC`).then((r) => r.json()),
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m,pressure_msl,visibility,weather_code&timezone=UTC`).then((r) => r.json()),
+    ]).then(([marineResult, atmoResult]) => {
+      if (cancelled) return
+
+      const marine = marineResult.status === 'fulfilled' ? marineResult.value?.current : null
+      const atmo = atmoResult.status === 'fulfilled' ? atmoResult.value?.current : null
+
+      if (!marine && !atmo) {
+        setWeatherError(true)
+        return
+      }
+
+      setShipWeather({
+        waveHeight: marine?.wave_height ?? null,
+        waveDirection: degToCompass(marine?.wave_direction),
+        wavePeriod: marine?.wave_period ?? null,
+        swellHeight: marine?.swell_wave_height ?? null,
+        seaTemp: marine?.sea_surface_temperature ?? null,
+        currentSpeed: marine?.ocean_current_velocity ?? null,
+        currentDirection: degToCompass(marine?.ocean_current_direction),
+        windSpeed: atmo?.wind_speed_10m ?? null,
+        windDirection: degToCompass(atmo?.wind_direction_10m),
+        windGusts: atmo?.wind_gusts_10m ?? null,
+        pressure: atmo?.pressure_msl ?? null,
+        visibility: atmo?.visibility != null ? Math.round(atmo.visibility / 1000) : null,
+        weatherText: weatherCodeToText(atmo?.weather_code),
+        isStorm: (atmo?.weather_code ?? 0) >= 95,
       })
-      .then((data) => {
-        const waveHeight = data?.hourly?.wave_height?.[0]
-        if (waveHeight == null) throw new Error('no wave data at this point')
-        setShipWeather({ waveHeight })
-      })
-      .catch(() => setWeatherError(true))
+    })
+
+    return () => { cancelled = true }
   }, [selectedShip])
 
   function buildShipMarker(d) {
@@ -1036,11 +1104,13 @@ function App() {
       </div>
 
       {selectedShip && (
-        <div style={{
+        <div onWheel={(e) => e.stopPropagation()} style={{
           position: 'absolute',
           top: 20,
           right: 20,
           width: 300,
+          maxHeight: 'calc(100vh - 80px)',
+          overflowY: 'auto',
           background: '#0d1620',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(63, 217, 199, 0.3)',
@@ -1095,6 +1165,15 @@ function App() {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: '#7f95a8' }}>Type</span><span>{selectedShip.vessel_type ?? 'unknown'}</span>
             </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#7f95a8' }}>Flag</span><span>{selectedShip.flag ?? 'unknown'}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#7f95a8' }}>IMO</span><span>{selectedShip.imo ?? 'not broadcast'}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#7f95a8' }}>Call sign</span><span>{selectedShip.call_sign ?? 'not broadcast'}</span>
+            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: '#7f95a8' }}>Status</span><span>{selectedShip.status}</span>
             </div>
@@ -1108,16 +1187,73 @@ function App() {
               <span style={{ color: '#7f95a8' }}>Last update</span>
               <span>{selectedShip.minutes_since_update ?? 0} min ago</span>
             </div>
-            {shipWeather && (
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#7f95a8' }}>Wave height</span>
-                <span>{shipWeather.waveHeight} m</span>
-              </div>
-            )}
           </div>
+
+          {shipWeather && (
+            <div style={{ fontSize: 12, lineHeight: 1.7, borderTop: '1px solid rgba(63, 217, 199, 0.2)', paddingTop: 10, marginBottom: 12 }}>
+              {shipWeather.isStorm && (
+                <div style={{ color: '#ff3b3b', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', fontSize: 11 }}>
+                  ⚠ Thunderstorm in area
+                </div>
+              )}
+              {shipWeather.weatherText && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Sky</span><span>{shipWeather.weatherText}</span>
+                </div>
+              )}
+              {shipWeather.windSpeed != null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Wind</span>
+                  <span>{shipWeather.windSpeed} km/h from {shipWeather.windDirection}</span>
+                </div>
+              )}
+              {shipWeather.windGusts != null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Wind gusts</span><span>{shipWeather.windGusts} km/h</span>
+                </div>
+              )}
+              {shipWeather.pressure != null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Pressure</span><span>{shipWeather.pressure} hPa</span>
+                </div>
+              )}
+              {shipWeather.visibility != null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Visibility</span><span>{shipWeather.visibility} km</span>
+                </div>
+              )}
+              {shipWeather.waveHeight != null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Wave height</span>
+                  <span>{shipWeather.waveHeight} m from {shipWeather.waveDirection}</span>
+                </div>
+              )}
+              {shipWeather.wavePeriod != null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Wave period</span><span>{shipWeather.wavePeriod} s</span>
+                </div>
+              )}
+              {shipWeather.swellHeight != null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Swell</span><span>{shipWeather.swellHeight} m</span>
+                </div>
+              )}
+              {shipWeather.seaTemp != null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Sea temp</span><span>{shipWeather.seaTemp}°C</span>
+                </div>
+              )}
+              {shipWeather.currentSpeed != null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#7f95a8' }}>Current</span>
+                  <span>{shipWeather.currentSpeed} km/h from {shipWeather.currentDirection}</span>
+                </div>
+              )}
+            </div>
+          )}
           {weatherError && (
             <p style={{ color: '#7f95a8', fontSize: 11, marginTop: -8, marginBottom: 12 }}>
-              No marine weather data (inland or unavailable)
+              No weather data available for this location
             </p>
           )}
 
@@ -1225,12 +1361,20 @@ function App() {
           background: '#0d1620',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(63, 217, 199, 0.3)',
-          borderLeft: '3px solid #3fd9c7',
+          borderLeft: `3px solid ${
+            selectedFacility.level === 'high' ? '#ff3b3b' :
+            selectedFacility.level === 'medium' ? '#f0b429' :
+            selectedFacility.level === 'low' ? '#4caf6d' : '#3fd9c7'
+          }`,
           borderRadius: 8,
           padding: '20px 24px',
           color: '#e8edf2',
           fontFamily: "'IBM Plex Sans', system-ui, sans-serif",
-          boxShadow: '0 0 24px rgba(63, 217, 199, 0.15)',
+          boxShadow: `0 0 24px ${
+            selectedFacility.level === 'high' ? 'rgba(255, 59, 59, 0.15)' :
+            selectedFacility.level === 'medium' ? 'rgba(240, 180, 41, 0.15)' :
+            selectedFacility.level === 'low' ? 'rgba(76, 175, 109, 0.15)' : 'rgba(63, 217, 199, 0.15)'
+          }`,
         }}>
           <button
             onClick={() => setSelectedFacility(null)}
@@ -1251,7 +1395,13 @@ function App() {
           <h3 style={{ margin: '0 0 4px', fontSize: 18, letterSpacing: '-0.01em' }}>
             {selectedFacility.name}
           </h3>
-          <p style={{ margin: '0 0 12px', color: '#3fd9c7', fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <p style={{
+            margin: '0 0 12px',
+            color: selectedFacility.level === 'high' ? '#ff3b3b' :
+                   selectedFacility.level === 'medium' ? '#f0b429' :
+                   selectedFacility.level === 'low' ? '#4caf6d' : '#3fd9c7',
+            fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.05em',
+          }}>
             {kindLabels[selectedFacility.kind] || 'Location'}
           </p>
 
@@ -1343,6 +1493,7 @@ function App() {
                 <div style={{
                   display: 'inline-block',
                   maxWidth: '85%',
+                  overflowWrap: 'break-word',
                   padding: '8px 12px',
                   borderRadius: 8,
                   fontSize: 12,
@@ -1350,7 +1501,7 @@ function App() {
                   color: '#e8edf2',
                   background: m.role === 'user' ? 'rgba(63, 217, 199, 0.15)' : 'rgba(127, 149, 168, 0.15)',
                 }}>
-                  {m.text}
+                  {renderChatText(m.text)}
                 </div>
               </div>
             ))}
