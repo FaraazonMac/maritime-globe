@@ -79,11 +79,13 @@ A live 3D ship-tracking globe (React + react-globe.gl) backed by a Python FastAP
 - ✅ Live globe with real ships, ports, lighthouses, shipyards, recycling yards, bunkering stations, dry/wet docks — all toggleable layers
 - ✅ Dark-fleet / sanctions-evasion detector — complete
 - ✅ Live port congestion score — complete
-- ✅ AI fleet chat assistant (Groq function-calling over live data) — complete
+- ✅ AI fleet chat assistant (Groq function-calling, multi-step, rate-limit-safe, over live data) — complete
 - ✅ Nearest-facility distance + compass bearing on every ship
-- ✅ Live weather per ship
-- ⬜ No flag/operator/build-year data (Equasis enrichment — still deferred)
+- ✅ Full live weather per ship (wind, sky, pressure, visibility, waves, swell, sea temp, current)
+- ✅ Real flag (from MMSI), IMO number, and call sign per ship (where broadcast)
+- ⬜ No operator or build-year data — no legitimate free source exists (Equasis requires login, no public API; not pursuing scraping)
 - ⬜ Live ship tracking still scoped to North Sea/English Channel (not worldwide) — deliberate, due to AIS volume/render performance at global scale
+- ⬜ Groq API key was briefly exposed during debugging in an earlier session — not yet regenerated
 
 ## Next target
-Decide on global ship tracking scope (or accept current region as final), then wrap-up tasks: `requirements.txt`, README rewrite, dead-code cleanup (test_ais.py, test_groq.py), demo video.
+Build a self-check/monitoring feature that verifies the whole project is actually working (backend up, AIS feed live, ports loaded, chat reachable). Then decide on global ship tracking scope, then wrap-up tasks: `requirements.txt`, README rewrite, dead-code cleanup (test_ais.py, test_groq.py), demo video.
