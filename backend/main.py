@@ -712,7 +712,8 @@ class ChatRequest(BaseModel):
 
 
 def query_ships(vessel_type=None, status=None, is_dark_flagged=None,
-                 min_minutes_since_update=None, near_port=None, radius_km=None, has_destination=None):
+                 min_minutes_since_update=None, near_port=None, radius_km=None,
+                 has_destination=None, has_departure=None):
     ships = flag_dark_ships(list(live_ships.values()))
 
     if vessel_type:
@@ -721,6 +722,8 @@ def query_ships(vessel_type=None, status=None, is_dark_flagged=None,
         ships = [s for s in ships if s.get("status") == status]
     if has_destination is not None:
         ships = [s for s in ships if bool(s.get("destination")) == has_destination]
+    if has_departure is not None:
+        ships = [s for s in ships if bool(s.get("departure_port")) == has_departure]
     if is_dark_flagged is not None:
         ships = [s for s in ships if s.get("is_dark_flagged") == is_dark_flagged]
     if min_minutes_since_update is not None:
@@ -754,7 +757,7 @@ def slim_for_model(result):
     # The model only needs a compact summary. The full ship list still goes to the globe.
     if "ships" not in result:
         return result
-    keep = ("name", "flag", "status", "vessel_type", "speed", "minutes_since_update")
+    keep = ("name", "flag", "status", "vessel_type", "speed", "minutes_since_update", "destination", "departure_port")
     return {
         "count": result["count"],
         "by_status": result.get("by_status"),
@@ -860,6 +863,7 @@ CHAT_TOOLS = [
                     "near_port": {"type": ["string", "null"], "description": "A port name, e.g. 'Rotterdam'"},
                     "radius_km": {"type": ["number", "null"], "description": "Search radius around near_port, default 20km"},
                     "has_destination": {"type": ["boolean", "null"], "description": "True to only return ships that have broadcast a destination in their AIS static data"},
+                    "has_departure": {"type": ["boolean", "null"], "description": "True to only return ships with a logged real departure-port event (detected live, not from AIS broadcast)"},
                 },
             },
         },
