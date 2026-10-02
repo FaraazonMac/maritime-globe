@@ -717,6 +717,7 @@ function App() {
   const [weatherError, setWeatherError] = useState(false)
   const [portRank, setPortRank] = useState(0)
   const [chatOpen, setChatOpen] = useState(false)
+  const [chatFacilities, setChatFacilities] = useState([])
   const [chatInput, setChatInput] = useState('')
   const [chatMessages, setChatMessages] = useState([])
   const [chatLoading, setChatLoading] = useState(false)
@@ -828,17 +829,32 @@ function App() {
     setChatInput('')
     setChatLoading(true)
 
+    const history = chatMessages.map((m) => ({ role: m.role, content: m.text }))
     fetch('http://127.0.0.1:8000/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: question }),
+      body: JSON.stringify({ message: question, history }),
     })
       .then((res) => res.json())
       .then((data) => {
         setChatMessages((prev) => [...prev, { role: 'assistant', text: data.reply }])
-        const names = (data.ships || []).map((s) => s.name)
-        const isPartial = (data.count ?? names.length) > names.length
-        setHighlightedShipNames(isPartial ? [] : names)
+
+        const ships = data.ships || []
+        const facilities = data.facilities || []
+        setHighlightedShipNames(ships.map((s) => s.name))
+        setChatFacilities(facilities)
+        setSelectedFacility(facilities.length === 1 ? facilities[0] : null)
+        if (ships.length > 0 || facilities.length > 0) setSelectedShip(null)
+
+        const points = [...ships, ...facilities].map((p) => ({ lat: p.lat, lng: p.lng }))
+        if (points.length === 1) {
+          globeRef.current?.pointOfView({ lat: points[0].lat, lng: points[0].lng, altitude: 0.4 }, 1500)
+        } else if (points.length > 1) {
+          const lat = points.reduce((sum, p) => sum + p.lat, 0) / points.length
+          const lng = points.reduce((sum, p) => sum + p.lng, 0) / points.length
+          const spread = Math.max(...points.map((p) => Math.hypot(p.lat - lat, p.lng - lng)))
+          globeRef.current?.pointOfView({ lat, lng, altitude: Math.min(2.5, Math.max(0.6, spread / 8)) }, 1500)
+        }
       })
       .catch(() => {
         setChatMessages((prev) => [...prev, { role: 'assistant', text: 'Something went wrong reaching the chat backend.' }])
@@ -904,8 +920,11 @@ function App() {
 
     const shape = d.status === 'moving' ? 'arrow' : 'circle'
     const isDimmed =
-      (selectedShip && d.name !== selectedShip.name) ||
-      (highlightedShipNames.length > 0 && !highlightedShipNames.includes(d.name))
+      (highlightedShipNames.length > 0
+        ? !highlightedShipNames.includes(d.name)
+        : (selectedShip && d.name !== selectedShip.name)) ||
+      (selectedFacility != null) ||
+      (chatFacilities.length > 0)
       const material = new THREE.SpriteMaterial({
       map: getShipTexture(shape, color),
       rotation: shape === 'arrow' ? THREE.MathUtils.degToRad(d.heading ?? 0) : 0,
@@ -968,7 +987,7 @@ function App() {
   ].filter(Boolean)
 
   const seen = new Map()
-  for (const m of [...toggledMarkers, ...nearbyMarkers, ...portCongestionMarkers]) {
+  for (const m of [...toggledMarkers, ...nearbyMarkers, ...portCongestionMarkers, ...chatFacilities]) {
     seen.set(`${m.name}-${m.lat}-${m.lng}`, m)
   }
   const facilityMarkers = Array.from(seen.values())
@@ -996,8 +1015,33 @@ function App() {
         objectLng="lng"
         objectAltitude={0.001}
         objectThreeObject={buildShipMarker}
-        onObjectClick={(obj) => { setSelectedShip(obj); setHighlightedShipNames([]) }}
+        onObjectClick={(obj) => {
+          setSelectedShip(obj)
+          if (!highlightedShipNames.includes(obj.name)) {
+            setHighlightedShipNames([])
+            setChatFacilities([])
+            setSelectedFacility(null)
+          }
+        }}
         objectsTransitionDuration={0}
+
+        arcsData={[
+          ...(selectedShip?.destination_port ? [{
+            startLat: selectedShip.lat, startLng: selectedShip.lng,
+            endLat: selectedShip.destination_port.lat, endLng: selectedShip.destination_port.lng,
+            color: '#3fd9c7',
+          }] : []),
+          ...(selectedShip?.departure_port ? [{
+            startLat: selectedShip.departure_port.lat, startLng: selectedShip.departure_port.lng,
+            endLat: selectedShip.lat, endLng: selectedShip.lng,
+            color: '#e07b3f',
+          }] : []),
+        ]}
+        arcColor={(a) => a.color}
+        arcDashLength={0.4}
+        arcDashGap={0.2}
+        arcDashAnimateTime={2000}
+        arcStroke={0.4}
 
         htmlElementsData={[...facilityMarkers, ...textLabels]}
         htmlLat="lat"
@@ -1042,13 +1086,17 @@ function App() {
           } else {
             el.title = d.name
             el.style.cursor = 'pointer'
-                        const visitedIndex = d.kind === 'port'
+            const visitedIndex = d.kind === 'port'
               ? visitedPorts.findIndex((p) => p.name === d.name && p.lat === d.lat && p.lng === d.lng)
               : -1
-            if (visitedIndex !== -1) {
+            const chatIndex = chatFacilities.length > 1
+              ? chatFacilities.findIndex((f) => f.name === d.name && f.lat === d.lat && f.lng === d.lng)
+              : -1
+            const badgeIndex = visitedIndex !== -1 ? visitedIndex : chatIndex
+            if (badgeIndex !== -1) {
               el.style.position = 'relative'
               el.innerHTML = `
-                <div style="position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:-12px; font-size:10px; font-weight:600; color:#3fd9c7; font-family:'IBM Plex Mono', monospace; white-space:nowrap;">${visitedIndex + 1}</div>
+                <div style="position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:-12px; font-size:10px; font-weight:600; color:#3fd9c7; font-family:'IBM Plex Mono', monospace; white-space:nowrap;">${badgeIndex + 1}</div>
                 ${markerSVG(d.kind)}
               `
             } else {
@@ -1102,6 +1150,8 @@ function App() {
           </label>
         ))}
       </div>
+
+      
 
       {selectedShip && (
         <div onWheel={(e) => e.stopPropagation()} style={{
@@ -1174,6 +1224,23 @@ function App() {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: '#7f95a8' }}>Call sign</span><span>{selectedShip.call_sign ?? 'not broadcast'}</span>
             </div>
+            {selectedShip.destination && (
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#7f95a8' }}>Destination</span>
+                <span>{selectedShip.destination}{selectedShip.destination_port ? ` (${selectedShip.destination_port.name})` : ''}</span>
+              </div>
+            )}
+            {selectedShip.eta && (
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#7f95a8' }}>ETA</span><span>{selectedShip.eta}</span>
+              </div>
+            )}
+            {selectedShip.departure_port && (
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#7f95a8' }}>Departed from</span>
+                <span>{selectedShip.departure_port.name}</span>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: '#7f95a8' }}>Status</span><span>{selectedShip.status}</span>
             </div>
@@ -1472,8 +1539,30 @@ function App() {
             fontWeight: 600,
             letterSpacing: '0.03em',
             textTransform: 'uppercase',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}>
             Fleet Assistant
+            {(chatFacilities.length > 0 || highlightedShipNames.length > 0) && (
+              <button
+                onClick={() => { setChatFacilities([]); setHighlightedShipNames([]); setSelectedFacility(null) }}
+                style={{
+                  background: 'rgba(255, 59, 59, 0.1)',
+                  border: '1px solid rgba(255, 59, 59, 0.4)',
+                  borderRadius: 6,
+                  padding: '4px 10px',
+                  color: '#ff3b3b',
+                  fontSize: 11,
+                  fontFamily: "'IBM Plex Sans', system-ui, sans-serif",
+                  cursor: 'pointer',
+                  textTransform: 'none',
+                  letterSpacing: 'normal',
+                }}
+              >
+                ✕ Clear
+              </button>
+            )}
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto', padding: 12 }}>

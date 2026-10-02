@@ -60,6 +60,318 @@ def fetch_ports():
         print(f"Failed to load World Port Index: {e}")
 
 
+# Trimmed copies of the frontend's curated facility lists — name/coordinates/type
+# only, just enough for the chat assistant to look one up and point to it on the
+# globe. Full descriptions (country, note) live only in the frontend, shown when
+# a marker is clicked directly.
+FACILITIES = [
+    # Lighthouses
+    {"name": "Tower of Hercules", "lat": 43.3853, "lng": -8.4066, "kind": "lighthouse"},
+    {"name": "Portland Head Light", "lat": 43.6231, "lng": -70.2083, "kind": "lighthouse"},
+    {"name": "Lighthouse of Chania", "lat": 35.5138, "lng": 24.0203, "kind": "lighthouse"},
+    {"name": "Fanad Lighthouse", "lat": 55.2764, "lng": -7.6378, "kind": "lighthouse"},
+    {"name": "Les Eclaireurs Lighthouse", "lat": -54.8730, "lng": -67.6800, "kind": "lighthouse"},
+    {"name": "Peggy's Cove Lighthouse", "lat": 44.4918, "lng": -63.9155, "kind": "lighthouse"},
+    {"name": "Lindau Lighthouse", "lat": 47.5460, "lng": 9.6840, "kind": "lighthouse"},
+    {"name": "Tourlitis Lighthouse", "lat": 37.6350, "lng": 24.9500, "kind": "lighthouse"},
+    {"name": "Pigeon Point Lighthouse", "lat": 37.1789, "lng": -122.3944, "kind": "lighthouse"},
+    {"name": "Cape Hatteras Lighthouse", "lat": 35.2508, "lng": -75.5292, "kind": "lighthouse"},
+    {"name": "Heceta Head Light", "lat": 44.1377, "lng": -124.1276, "kind": "lighthouse"},
+    {"name": "Formentor Lighthouse", "lat": 39.9583, "lng": 3.2075, "kind": "lighthouse"},
+    {"name": "Lindesnes Lighthouse", "lat": 57.9838, "lng": 7.0453, "kind": "lighthouse"},
+    {"name": "Split Rock Lighthouse", "lat": 47.2001, "lng": -91.3675, "kind": "lighthouse"},
+    {"name": "Cape Byron Light", "lat": -28.6382, "lng": 153.6382, "kind": "lighthouse"},
+    {"name": "Diamond Head Lighthouse", "lat": 21.2559, "lng": -157.8064, "kind": "lighthouse"},
+    {"name": "Kõpu Lighthouse", "lat": 58.9167, "lng": 22.1000, "kind": "lighthouse"},
+    {"name": "Eldred Rock Light", "lat": 58.9833, "lng": -135.2167, "kind": "lighthouse"},
+    {"name": "Hook Lighthouse", "lat": 52.1242, "lng": -6.9297, "kind": "lighthouse"},
+    {"name": "Fastnet Rock Lighthouse", "lat": 51.3856, "lng": -9.6033, "kind": "lighthouse"},
+    {"name": "Maiden's Tower Lighthouse", "lat": 41.0211, "lng": 29.0044, "kind": "lighthouse"},
+    {"name": "Bodie Island Lighthouse", "lat": 35.8228, "lng": -75.5647, "kind": "lighthouse"},
+    {"name": "Felgueiras Lighthouse", "lat": 41.1500, "lng": -8.6700, "kind": "lighthouse"},
+    {"name": "Bell Rock Lighthouse", "lat": 56.4331, "lng": -2.3831, "kind": "lighthouse"},
+    {"name": "South Stack Lighthouse", "lat": 53.3086, "lng": -4.6967, "kind": "lighthouse"},
+    {"name": "Jeddah Light", "lat": 21.4858, "lng": 39.1500, "kind": "lighthouse"},
+    {"name": "Low Lighthouse", "lat": 51.2378, "lng": -3.0044, "kind": "lighthouse"},
+    {"name": "Makapu'u Point Light", "lat": 21.3106, "lng": -157.6494, "kind": "lighthouse"},
+    {"name": "Cape Point Lighthouse", "lat": -34.3568, "lng": 18.4970, "kind": "lighthouse"},
+    {"name": "Mouro Island Lighthouse", "lat": 43.4644, "lng": -3.7728, "kind": "lighthouse"},
+    {"name": "Point Bonita Lighthouse", "lat": 37.8158, "lng": -122.5328, "kind": "lighthouse"},
+    {"name": "St. Joseph Lighthouse", "lat": 42.1119, "lng": -86.4956, "kind": "lighthouse"},
+    {"name": "Cape Reinga Lighthouse", "lat": -34.4269, "lng": 172.6817, "kind": "lighthouse"},
+    {"name": "Sambro Island Light", "lat": 44.4611, "lng": -63.5975, "kind": "lighthouse"},
+    {"name": "Rubjerg Knude Lighthouse", "lat": 57.4489, "lng": 9.7856, "kind": "lighthouse"},
+    {"name": "Gay Head Light", "lat": 41.3489, "lng": -70.8347, "kind": "lighthouse"},
+    {"name": "Créac'h Lighthouse", "lat": 48.4578, "lng": -5.1247, "kind": "lighthouse"},
+    {"name": "Start Point Lighthouse", "lat": 50.2211, "lng": -3.6386, "kind": "lighthouse"},
+    {"name": "Whiteford Lighthouse", "lat": 51.5883, "lng": -4.2453, "kind": "lighthouse"},
+    {"name": "Point Vicente Lighthouse", "lat": 33.7444, "lng": -118.4128, "kind": "lighthouse"},
+    {"name": "Rockland Harbor Breakwater Light", "lat": 44.1114, "lng": -69.0783, "kind": "lighthouse"},
+    {"name": "Beachy Head Lighthouse", "lat": 50.7386, "lng": 0.2447, "kind": "lighthouse"},
+    {"name": "Hog (Paradise) Island Lighthouse", "lat": 25.0850, "lng": -77.3050, "kind": "lighthouse"},
+    {"name": "Pemaquid Point Light", "lat": 43.8372, "lng": -69.5058, "kind": "lighthouse"},
+    {"name": "St. Augustine Light", "lat": 29.8850, "lng": -81.2878, "kind": "lighthouse"},
+    {"name": "St. Mary's Lighthouse", "lat": 55.0722, "lng": -1.4472, "kind": "lighthouse"},
+    {"name": "Neist Point Lighthouse", "lat": 57.4256, "lng": -6.7883, "kind": "lighthouse"},
+    {"name": "La Corbière Lighthouse", "lat": 49.1867, "lng": -2.2306, "kind": "lighthouse"},
+    {"name": "Kjeungskjær Lighthouse", "lat": 63.7594, "lng": 9.9944, "kind": "lighthouse"},
+    {"name": "Lighthouse of Genoa", "lat": 44.4105, "lng": 8.9114, "kind": "lighthouse"},
+    {"name": "Cape Neddick Light", "lat": 43.1656, "lng": -70.5928, "kind": "lighthouse"},
+    {"name": "Galle Lighthouse", "lat": 6.0261, "lng": 80.2172, "kind": "lighthouse"},
+    {"name": "Middle Bay Light", "lat": 30.3958, "lng": -88.0192, "kind": "lighthouse"},
+    {"name": "Slettnes Lighthouse", "lat": 71.0972, "lng": 28.2158, "kind": "lighthouse"},
+    {"name": "Hornby Lighthouse", "lat": -33.8306, "lng": 151.2789, "kind": "lighthouse"},
+    {"name": "Yaquina Head Light", "lat": 44.6799, "lng": -124.0794, "kind": "lighthouse"},
+    {"name": "Enoshima Sea Candle", "lat": 35.2997, "lng": 139.4800, "kind": "lighthouse"},
+    {"name": "Vizhinjam Lighthouse", "lat": 8.3789, "lng": 76.9711, "kind": "lighthouse"},
+    {"name": "Nugget Point Lighthouse", "lat": -46.4467, "lng": 169.8189, "kind": "lighthouse"},
+    {"name": "Cape Leeuwin Lighthouse", "lat": -34.3739, "lng": 115.1358, "kind": "lighthouse"},
+    {"name": "Eastern Point Light", "lat": 42.5772, "lng": -70.6636, "kind": "lighthouse"},
+    {"name": "Green Point Lighthouse", "lat": -33.9033, "lng": 18.4008, "kind": "lighthouse"},
+    {"name": "Koh Lanta Lighthouse", "lat": 7.5000, "lng": 99.0500, "kind": "lighthouse"},
+    {"name": "Kołobrzeg Lighthouse", "lat": 54.1811, "lng": 15.5622, "kind": "lighthouse"},
+    {"name": "Los Morrillos Lighthouse", "lat": 17.9333, "lng": -67.1936, "kind": "lighthouse"},
+    {"name": "Nazaré Lighthouse", "lat": 39.6011, "lng": -9.0808, "kind": "lighthouse"},
+    {"name": "Yokohama Marine Tower", "lat": 35.4425, "lng": 139.6503, "kind": "lighthouse"},
+    {"name": "Cape Espichel Lighthouse", "lat": 38.4167, "lng": -9.2167, "kind": "lighthouse"},
+    {"name": "Kermorvan Lighthouse", "lat": 48.3600, "lng": -4.7900, "kind": "lighthouse"},
+    {"name": "Gibbs Hill Lighthouse", "lat": 32.2489, "lng": -64.8383, "kind": "lighthouse"},
+    {"name": "Cape Palliser Lighthouse", "lat": -41.6108, "lng": 175.2839, "kind": "lighthouse"},
+    {"name": "Big Sable Point Light", "lat": 44.0561, "lng": -86.5122, "kind": "lighthouse"},
+    {"name": "Jose Ignacio Lighthouse", "lat": -34.8386, "lng": -54.6667, "kind": "lighthouse"},
+    {"name": "Punta Penna Lighthouse", "lat": 42.1611, "lng": 14.7508, "kind": "lighthouse"},
+    {"name": "Cape Agulhas Lighthouse", "lat": -34.8286, "lng": 20.0122, "kind": "lighthouse"},
+    {"name": "Fingal Head Light", "lat": -28.2064, "lng": 153.5647, "kind": "lighthouse"},
+    {"name": "Fox Point Lighthouse", "lat": 51.3717, "lng": -55.5808, "kind": "lighthouse"},
+    {"name": "Hillsboro Inlet Light", "lat": 26.2589, "lng": -80.0806, "kind": "lighthouse"},
+    {"name": "La Jument Lighthouse", "lat": 48.2489, "lng": -5.1319, "kind": "lighthouse"},
+    {"name": "Portland Bill Lighthouse", "lat": 50.5164, "lng": -2.4581, "kind": "lighthouse"},
+    {"name": "Sumiyoshi Lighthouse", "lat": 34.6136, "lng": 135.4939, "kind": "lighthouse"},
+    {"name": "Punta del Hidalgo Lighthouse", "lat": 28.5672, "lng": -16.3236, "kind": "lighthouse"},
+    {"name": "Point Reyes Lighthouse", "lat": 37.9950, "lng": -123.0181, "kind": "lighthouse"},
+    {"name": "Alcatraz Island Lighthouse", "lat": 37.8267, "lng": -122.4230, "kind": "lighthouse"},
+    {"name": "Cape Horn Lighthouse", "lat": -55.9789, "lng": -67.2919, "kind": "lighthouse"},
+    {"name": "San Juan del Salvamento Lighthouse", "lat": -54.7397, "lng": -63.8067, "kind": "lighthouse"},
+    {"name": "Tillamook Rock Light", "lat": 45.9375, "lng": -124.0161, "kind": "lighthouse"},
+    {"name": "Tranøy Lighthouse", "lat": 68.4394, "lng": 15.9497, "kind": "lighthouse"},
+    {"name": "Al Ayjah Lighthouse", "lat": 22.5667, "lng": 59.5333, "kind": "lighthouse"},
+    {"name": "Amédée Lighthouse", "lat": -22.4839, "lng": 166.4728, "kind": "lighthouse"},
+    {"name": "Baishamen Lighthouse", "lat": 20.0500, "lng": 110.3833, "kind": "lighthouse"},
+    {"name": "Ribadeo Lighthouse", "lat": 43.5611, "lng": -7.0322, "kind": "lighthouse"},
+    {"name": "Knarrarós Lighthouse", "lat": 63.8631, "lng": -21.1150, "kind": "lighthouse"},
+    {"name": "Kullen Lighthouse", "lat": 56.3011, "lng": 12.4553, "kind": "lighthouse"},
+    {"name": "South Haven Light", "lat": 42.4028, "lng": -86.2833, "kind": "lighthouse"},
+    {"name": "White Shoal Light", "lat": 45.8394, "lng": -85.1417, "kind": "lighthouse"},
+    {"name": "Cikoneng Lighthouse", "lat": -6.8447, "lng": 105.2011, "kind": "lighthouse"},
+    {"name": "Farallon Island Light", "lat": 37.6975, "lng": -123.0011, "kind": "lighthouse"},
+    {"name": "Holland Harbor Light", "lat": 42.7742, "lng": -86.2144, "kind": "lighthouse"},
+    {"name": "Izumo Hinomisaki Lighthouse", "lat": 35.4381, "lng": 132.6167, "kind": "lighthouse"},
+    {"name": "Kiipsaare Lighthouse", "lat": 58.5333, "lng": 21.8333, "kind": "lighthouse"},
+    {"name": "Point Sur Lighthouse", "lat": 36.3081, "lng": -121.9042, "kind": "lighthouse"},
+    {"name": "Promthep Cape Lighthouse", "lat": 7.7644, "lng": 98.3033, "kind": "lighthouse"},
+    {"name": "Cape Spear Lighthouse", "lat": 47.5225, "lng": -52.6197, "kind": "lighthouse"},
+    {"name": "Earhart Light", "lat": 0.8081, "lng": -176.6178, "kind": "lighthouse"},
+    {"name": "Eddystone Lighthouse", "lat": 50.1811, "lng": -4.1592, "kind": "lighthouse"},
+    {"name": "Isla Mujeres Lighthouse", "lat": 21.2314, "lng": -86.7286, "kind": "lighthouse"},
+    {"name": "Lismore Lighthouse", "lat": 56.4292, "lng": -5.5992, "kind": "lighthouse"},
+    {"name": "Montauk Point Light", "lat": 41.0717, "lng": -71.8567, "kind": "lighthouse"},
+    {"name": "Royal Sovereign Lighthouse", "lat": 50.7139, "lng": 0.4353, "kind": "lighthouse"},
+    {"name": "Santa Marta Lighthouse", "lat": 38.6975, "lng": -9.4211, "kind": "lighthouse"},
+    {"name": "Thomas Point Shoal Light", "lat": 38.8994, "lng": -76.4364, "kind": "lighthouse"},
+    {"name": "Toledo Harbor Light", "lat": 41.7469, "lng": -83.3339, "kind": "lighthouse"},
+    {"name": "Cape Race Lighthouse", "lat": 46.6600, "lng": -53.0761, "kind": "lighthouse"},
+    {"name": "Castle Hill Light", "lat": 41.4589, "lng": -71.3608, "kind": "lighthouse"},
+    {"name": "Macquarie Lighthouse", "lat": -33.8236, "lng": 151.2856, "kind": "lighthouse"},
+    {"name": "Petit Minou Lighthouse", "lat": 48.3597, "lng": -4.6197, "kind": "lighthouse"},
+    {"name": "Sergipe Light", "lat": -10.9111, "lng": -37.0500, "kind": "lighthouse"},
+    {"name": "Sandy Hook Light", "lat": 40.4611, "lng": -73.9928, "kind": "lighthouse"},
+    {"name": "Battery Point Light", "lat": 41.7461, "lng": -124.2100, "kind": "lighthouse"},
+    {"name": "Cape du Couedic Lighthouse", "lat": -36.0667, "lng": 136.7000, "kind": "lighthouse"},
+    {"name": "Green Cape Lighthouse", "lat": -37.2647, "lng": 149.9683, "kind": "lighthouse"},
+    {"name": "Húsavík Light", "lat": 66.0449, "lng": -17.3389, "kind": "lighthouse"},
+    {"name": "Madang Lighthouse", "lat": -5.2214, "lng": 145.7947, "kind": "lighthouse"},
+    {"name": "Oak Island Light", "lat": 33.8847, "lng": -78.0181, "kind": "lighthouse"},
+    {"name": "Point Pinos Lighthouse", "lat": 36.6350, "lng": -121.9339, "kind": "lighthouse"},
+    {"name": "Point Prim Lighthouse", "lat": 46.0561, "lng": -63.0758, "kind": "lighthouse"},
+    {"name": "Cape Egmont Lighthouse", "lat": -39.2967, "lng": 173.9450, "kind": "lighthouse"},
+    {"name": "Cape Guardafui Lighthouse", "lat": 11.8167, "lng": 51.2833, "kind": "lighthouse"},
+    {"name": "Hope Town Lighthouse", "lat": 26.5386, "lng": -76.9814, "kind": "lighthouse"},
+    {"name": "Marjaniemi Lighthouse", "lat": 65.0403, "lng": 24.5561, "kind": "lighthouse"},
+    {"name": "Marshall Point Light", "lat": 43.9219, "lng": -69.2597, "kind": "lighthouse"},
+    {"name": "Smeaton's Tower", "lat": 50.3644, "lng": -4.1408, "kind": "lighthouse"},
+    {"name": "Bass Harbor Head Light", "lat": 44.2233, "lng": -68.3372, "kind": "lighthouse"},
+    {"name": "Enragée Point Lighthouse", "lat": 45.6167, "lng": -60.9833, "kind": "lighthouse"},
+    {"name": "Île Vierge Lighthouse", "lat": 48.6042, "lng": -4.5636, "kind": "lighthouse"},
+    {"name": "Key West Lighthouse", "lat": 24.5514, "lng": -81.8014, "kind": "lighthouse"},
+    {"name": "West Point Light", "lat": 47.6631, "lng": -122.4283, "kind": "lighthouse"},
+    {"name": "Wind Point Light", "lat": 42.7847, "lng": -87.7789, "kind": "lighthouse"},
+    {"name": "Burlington Breakwater Lights", "lat": 44.4761, "lng": -73.2264, "kind": "lighthouse"},
+    {"name": "California Lighthouse", "lat": 12.6208, "lng": -70.0428, "kind": "lighthouse"},
+    {"name": "Cape Henry Lighthouse", "lat": 36.9256, "lng": -76.0058, "kind": "lighthouse"},
+    {"name": "Castle Point Lighthouse", "lat": -40.9014, "lng": 176.2192, "kind": "lighthouse"},
+    {"name": "Notre-Dame-des-Anges Lighthouse", "lat": 42.5256, "lng": 3.0836, "kind": "lighthouse"},
+    {"name": "Klein Curaçao Lighthouse", "lat": 11.9906, "lng": -68.6608, "kind": "lighthouse"},
+    {"name": "Porer Lighthouse", "lat": 44.7503, "lng": 13.8867, "kind": "lighthouse"},
+    {"name": "Slangkop Lighthouse", "lat": -34.1394, "lng": 18.3242, "kind": "lighthouse"},
+    {"name": "Louisbourg Lighthouse", "lat": 45.9106, "lng": -59.9636, "kind": "lighthouse"},
+    {"name": "Cabo de Palos Lighthouse", "lat": 37.6386, "lng": -0.6997, "kind": "lighthouse"},
+    {"name": "Cape Finisterre Lighthouse", "lat": 42.8781, "lng": -9.2714, "kind": "lighthouse"},
+
+    # Ship recycling yards
+    {"name": "Alang Ship Breaking Yard", "lat": 21.42, "lng": 72.13, "kind": "recycling"},
+    {"name": "Chittagong Ship Breaking Yard", "lat": 22.30, "lng": 91.75, "kind": "recycling"},
+    {"name": "Gadani Ship Breaking Yard", "lat": 25.10, "lng": 66.73, "kind": "recycling"},
+    {"name": "Aliağa Ship Recycling", "lat": 38.80, "lng": 26.97, "kind": "recycling"},
+    {"name": "Zhangjiagang Ship Recycling", "lat": 31.87, "lng": 120.56, "kind": "recycling"},
+    {"name": "Brownsville Ship Channel", "lat": 25.95, "lng": -97.35, "kind": "recycling"},
+    {"name": "Galloo Ship Recycling – Ghent", "lat": 51.09, "lng": 3.72, "kind": "recycling"},
+    {"name": "Able UK – Teesside", "lat": 54.60, "lng": -1.15, "kind": "recycling"},
+    {"name": "Green Yard – Kleven", "lat": 62.47, "lng": 6.02, "kind": "recycling"},
+    {"name": "Rotterdam Green Ship Recycling", "lat": 51.90, "lng": 4.48, "kind": "recycling"},
+    {"name": "Leyal Ship Recycling – Aliağa", "lat": 38.79, "lng": 26.98, "kind": "recycling"},
+    {"name": "Kaohsiung Ship Recycling", "lat": 22.58, "lng": 120.28, "kind": "recycling"},
+    {"name": "Mumbai Ship Breaking (Darukhana)", "lat": 18.96, "lng": 72.85, "kind": "recycling"},
+    {"name": "Jiangyin Ship Recycling", "lat": 31.91, "lng": 120.28, "kind": "recycling"},
+    {"name": "Avilés Ship Recycling", "lat": 43.57, "lng": -5.92, "kind": "recycling"},
+
+    # Bunkering stations
+    {"name": "Port of Singapore Bunkering Hub", "lat": 1.26, "lng": 103.82, "kind": "bunker"},
+    {"name": "Fujairah Bunkering Anchorage", "lat": 25.12, "lng": 56.34, "kind": "bunker"},
+    {"name": "Rotterdam Bunkering Hub", "lat": 51.95, "lng": 4.14, "kind": "bunker"},
+    {"name": "Zhoushan Bunkering Hub", "lat": 29.98, "lng": 122.21, "kind": "bunker"},
+    {"name": "Hong Kong Bunkering Hub", "lat": 22.28, "lng": 114.16, "kind": "bunker"},
+    {"name": "Antwerp Bunkering Hub", "lat": 51.29, "lng": 4.34, "kind": "bunker"},
+    {"name": "Busan Bunkering Hub", "lat": 35.10, "lng": 129.04, "kind": "bunker"},
+    {"name": "Gibraltar Bunkering Anchorage", "lat": 36.14, "lng": -5.35, "kind": "bunker"},
+    {"name": "Panama Canal Bunkering (Balboa/Cristóbal)", "lat": 8.95, "lng": -79.55, "kind": "bunker"},
+    {"name": "Algeciras Bunkering Hub", "lat": 36.14, "lng": -5.45, "kind": "bunker"},
+    {"name": "Los Angeles/Long Beach Bunkering", "lat": 33.74, "lng": -118.26, "kind": "bunker"},
+    {"name": "Shanghai Bunkering Hub", "lat": 31.23, "lng": 121.47, "kind": "bunker"},
+    {"name": "Piraeus Bunkering Hub", "lat": 37.94, "lng": 23.65, "kind": "bunker"},
+    {"name": "Port Said Bunkering", "lat": 31.26, "lng": 32.30, "kind": "bunker"},
+    {"name": "Tanjung Pelepas Bunkering", "lat": 1.36, "lng": 103.55, "kind": "bunker"},
+    {"name": "Houston Bunkering Hub", "lat": 29.73, "lng": -95.02, "kind": "bunker"},
+    {"name": "Colombo Bunkering Hub", "lat": 6.95, "lng": 79.84, "kind": "bunker"},
+    {"name": "Yokohama Bunkering Hub", "lat": 35.44, "lng": 139.64, "kind": "bunker"},
+    {"name": "Ulsan Bunkering Hub", "lat": 35.50, "lng": 129.38, "kind": "bunker"},
+    {"name": "New York/New Jersey Bunkering", "lat": 40.68, "lng": -74.03, "kind": "bunker"},
+    {"name": "Durban Bunkering Hub", "lat": -29.87, "lng": 31.02, "kind": "bunker"},
+    {"name": "Las Palmas Bunkering Hub", "lat": 28.15, "lng": -15.41, "kind": "bunker"},
+    {"name": "Ningbo-Zhoushan Bunkering", "lat": 29.87, "lng": 121.55, "kind": "bunker"},
+    {"name": "Jebel Ali Bunkering Hub", "lat": 25.01, "lng": 55.06, "kind": "bunker"},
+    {"name": "Constanța Bunkering Hub", "lat": 44.16, "lng": 28.65, "kind": "bunker"},
+    {"name": "Novorossiysk Bunkering Hub", "lat": 44.72, "lng": 37.78, "kind": "bunker"},
+    {"name": "Santos Bunkering Hub", "lat": -23.99, "lng": -46.30, "kind": "bunker"},
+    {"name": "Cartagena Bunkering Hub", "lat": 10.40, "lng": -75.51, "kind": "bunker"},
+    {"name": "Suez Bunkering Hub", "lat": 29.97, "lng": 32.55, "kind": "bunker"},
+    {"name": "Dalian Bunkering Hub", "lat": 38.93, "lng": 121.61, "kind": "bunker"},
+
+    # Dry docks
+    {"name": "Dubai Drydocks World", "lat": 25.27, "lng": 55.05, "kind": "drydock"},
+    {"name": "Keppel Shipyard – Singapore", "lat": 1.29, "lng": 103.65, "kind": "drydock"},
+    {"name": "CSBC Kaohsiung Shipyard", "lat": 22.58, "lng": 120.28, "kind": "drydock"},
+    {"name": "Hyundai Heavy Industries – Gunsan", "lat": 35.97, "lng": 126.68, "kind": "drydock"},
+    {"name": "Hyundai Samho Heavy Industries", "lat": 34.68, "lng": 126.44, "kind": "drydock"},
+    {"name": "Chantiers de l'Atlantique – Saint-Nazaire", "lat": 47.28, "lng": -2.20, "kind": "drydock"},
+    {"name": "Cammell Laird – Birkenhead", "lat": 53.39, "lng": -3.00, "kind": "drydock"},
+    {"name": "Navantia – Cádiz", "lat": 36.53, "lng": -6.28, "kind": "drydock"},
+    {"name": "Colombo Dockyard", "lat": 6.95, "lng": 79.85, "kind": "drydock"},
+    {"name": "Rio de Janeiro Dry Dock", "lat": -22.80, "lng": -43.20, "kind": "drydock"},
+    {"name": "Alexandria Shipyard", "lat": 31.20, "lng": 29.88, "kind": "drydock"},
+    {"name": "Balboa Shipyard – Panama City", "lat": 8.95, "lng": -79.57, "kind": "drydock"},
+    {"name": "Hong Kong United Dockyards – Tsing Yi", "lat": 22.36, "lng": 114.10, "kind": "drydock"},
+    {"name": "Sturrock Dry Dock – Cape Town", "lat": 33.90, "lng": 18.43, "kind": "drydock"},
+    {"name": "Detyens Shipyards – Charleston", "lat": 32.83, "lng": -79.98, "kind": "drydock"},
+    {"name": "Newport News Shipbuilding – Dry Dock 12", "lat": 36.98, "lng": -76.43, "kind": "drydock"},
+    {"name": "Alabama Shipyard – Mobile", "lat": 30.68, "lng": -88.04, "kind": "drydock"},
+    {"name": "ASMAR Shipyards – Talcahuano", "lat": -36.72, "lng": -73.12, "kind": "drydock"},
+    {"name": "Sumitomo Heavy Industries – Yokosuka", "lat": 35.30, "lng": 139.67, "kind": "drydock"},
+    {"name": "New Times Shipyard – Jingjiang", "lat": 32.02, "lng": 120.27, "kind": "drydock"},
+
+    # Wet docks
+    {"name": "Royal Albert Dock – London", "lat": 51.508, "lng": 0.056, "kind": "wetdock"},
+    {"name": "Waalhaven – Rotterdam", "lat": 51.89, "lng": 4.45, "kind": "wetdock"},
+    {"name": "Kattendijkdok – Antwerp", "lat": 51.24, "lng": 4.41, "kind": "wetdock"},
+    {"name": "Le Havre Wet Docks", "lat": 49.49, "lng": 0.11, "kind": "wetdock"},
+    {"name": "Hamburg Harbour Wet Docks", "lat": 53.54, "lng": 9.99, "kind": "wetdock"},
+    {"name": "Kidderpore Docks – Kolkata", "lat": 22.54, "lng": 88.31, "kind": "wetdock"},
+    {"name": "Cockatoo Island Wet Dock – Sydney", "lat": -33.85, "lng": 151.17, "kind": "wetdock"},
+    {"name": "Erie Basin – Brooklyn", "lat": 40.67, "lng": -74.01, "kind": "wetdock"},
+    {"name": "Alexandra Basin – Dublin Port", "lat": 53.34, "lng": -6.20, "kind": "wetdock"},
+    {"name": "Salford Docks – Manchester", "lat": 53.47, "lng": -2.30, "kind": "wetdock"},
+
+    # Shipyards
+    {"name": "Yangzijiang Shipbuilding", "lat": 32.02, "lng": 120.27, "kind": "shipyard"},
+    {"name": "CSSC Wuchang Shipbuilding", "lat": 30.55, "lng": 114.30, "kind": "shipyard"},
+    {"name": "Jinling Shipyard – Nanjing", "lat": 32.06, "lng": 118.80, "kind": "shipyard"},
+    {"name": "Nantong COSCO KHI Ship Engineering", "lat": 32.08, "lng": 120.86, "kind": "shipyard"},
+    {"name": "Tsuneishi Shipbuilding", "lat": 34.36, "lng": 133.32, "kind": "shipyard"},
+    {"name": "Oshima Shipbuilding", "lat": 32.83, "lng": 129.98, "kind": "shipyard"},
+    {"name": "Onomichi Shipbuilding (Japan Marine United)", "lat": 34.41, "lng": 133.20, "kind": "shipyard"},
+    {"name": "HD Hyundai Mipo Dockyard", "lat": 35.49, "lng": 129.39, "kind": "shipyard"},
+    {"name": "HJ Shipbuilding & Construction (formerly Hanjin)", "lat": 35.10, "lng": 129.03, "kind": "shipyard"},
+    {"name": "Sembcorp Marine – Tuas", "lat": 1.32, "lng": 103.64, "kind": "shipyard"},
+    {"name": "PaxOcean Shipyard – Batam", "lat": 1.13, "lng": 104.05, "kind": "shipyard"},
+    {"name": "Larsen & Toubro Shipyard – Kattupalli", "lat": 13.29, "lng": 80.32, "kind": "shipyard"},
+    {"name": "Goa Shipyard Limited", "lat": 15.40, "lng": 73.83, "kind": "shipyard"},
+    {"name": "Garden Reach Shipbuilders – Kolkata", "lat": 22.54, "lng": 88.31, "kind": "shipyard"},
+    {"name": "ASRY – Bahrain", "lat": 26.20, "lng": 50.61, "kind": "shipyard"},
+    {"name": "Abu Dhabi Ship Building (ADSB)", "lat": 24.42, "lng": 54.47, "kind": "shipyard"},
+    {"name": "Lamprell – Hamriyah", "lat": 25.42, "lng": 55.46, "kind": "shipyard"},
+    {"name": "Tuzla Shipyards Zone – Istanbul", "lat": 40.82, "lng": 29.35, "kind": "shipyard"},
+    {"name": "RMK Marine – Tuzla", "lat": 40.82, "lng": 29.36, "kind": "shipyard"},
+    {"name": "Remontowa Shipyard – Gdańsk", "lat": 54.36, "lng": 18.67, "kind": "shipyard"},
+    {"name": "Crist Shipyard – Gdynia", "lat": 54.53, "lng": 18.55, "kind": "shipyard"},
+    {"name": "Meyer Turku", "lat": 60.42, "lng": 22.18, "kind": "shipyard"},
+    {"name": "Ulstein Verft", "lat": 62.35, "lng": 5.85, "kind": "shipyard"},
+    {"name": "Vard Group – Søviknes", "lat": 62.68, "lng": 6.80, "kind": "shipyard"},
+    {"name": "Astilleros Gondan", "lat": 43.55, "lng": -6.38, "kind": "shipyard"},
+    {"name": "Freire Shipyard – Vigo", "lat": 42.24, "lng": -8.72, "kind": "shipyard"},
+    {"name": "Fincantieri – Ancona", "lat": 43.60, "lng": 13.51, "kind": "shipyard"},
+    {"name": "Fincantieri – Castellammare di Stabia", "lat": 40.70, "lng": 14.48, "kind": "shipyard"},
+    {"name": "Naval Group – Lorient", "lat": 47.75, "lng": -3.37, "kind": "shipyard"},
+    {"name": "STX France – Saint-Nazaire", "lat": 47.28, "lng": -2.20, "kind": "shipyard"},
+    {"name": "Harland & Wolff – Belfast", "lat": 54.61, "lng": -5.90, "kind": "shipyard"},
+    {"name": "Babcock Marine – Rosyth", "lat": 56.03, "lng": -3.44, "kind": "shipyard"},
+    {"name": "Blohm+Voss – Hamburg", "lat": 53.54, "lng": 9.96, "kind": "shipyard"},
+    {"name": "Lloyd Werft – Bremerhaven", "lat": 53.53, "lng": 8.58, "kind": "shipyard"},
+    {"name": "Damen Shipyards – Schelde", "lat": 51.45, "lng": 3.83, "kind": "shipyard"},
+    {"name": "Severnoye Design Bureau / Admiralty Shipyards – St. Petersburg", "lat": 59.92, "lng": 30.28, "kind": "shipyard"},
+    {"name": "Sungdong Shipbuilding – Tongyeong", "lat": 34.85, "lng": 128.43, "kind": "shipyard"},
+    {"name": "STX Offshore & Shipbuilding – Jinhae", "lat": 35.15, "lng": 128.68, "kind": "shipyard"},
+    {"name": "Vard Braila", "lat": 45.27, "lng": 27.98, "kind": "shipyard"},
+    {"name": "Damen Shipyards Mangalia", "lat": 43.81, "lng": 28.58, "kind": "shipyard"},
+    {"name": "Estaleiro Atlântico Sul", "lat": -8.30, "lng": -34.93, "kind": "shipyard"},
+    {"name": "Astillero Río Santiago", "lat": -34.85, "lng": -57.90, "kind": "shipyard"},
+    {"name": "Karachi Shipyard & Engineering Works", "lat": 24.85, "lng": 66.98, "kind": "shipyard"},
+    {"name": "Chittagong Dry Dock Limited", "lat": 22.31, "lng": 91.79, "kind": "shipyard"},
+    {"name": "Colombo Dockyard – Shipbuilding Division", "lat": 6.95, "lng": 79.85, "kind": "shipyard"},
+    {"name": "Wärtsilä Shipyard – Turku (historic)", "lat": 60.42, "lng": 22.18, "kind": "shipyard"},
+    {"name": "Nordic Yards – Wismar", "lat": 53.90, "lng": 11.47, "kind": "shipyard"},
+    {"name": "Damen Shipyards Galați", "lat": 45.44, "lng": 28.03, "kind": "shipyard"},
+    {"name": "China Merchants Industry Shipyard – Shenzhen", "lat": 22.47, "lng": 113.88, "kind": "shipyard"},
+    {"name": "Huangpu Wenchong Shipbuilding", "lat": 23.10, "lng": 113.47, "kind": "shipyard"},
+    {"name": "Keppel Shipyard – Singapore (Shipbuilding Division)", "lat": 1.29, "lng": 103.65, "kind": "shipyard"},
+    {"name": "Cosco Shipping Heavy Industry – Qidong", "lat": 31.80, "lng": 121.66, "kind": "shipyard"},
+    {"name": "Fujian Southeast Shipyard", "lat": 24.98, "lng": 118.68, "kind": "shipyard"},
+    {"name": "Damen Shipyards Bergum", "lat": 53.20, "lng": 6.00, "kind": "shipyard"},
+    {"name": "Vard Vung Tau", "lat": 10.35, "lng": 107.08, "kind": "shipyard"},
+]
+
+
+def find_facility(name):
+    if not name:
+        return {"error": "No name given"}
+    q = name.strip().lower()
+    if len(q) < 2:
+        return {"error": "Name too short to search"}
+    combined = [{"name": p["name"], "lat": p["lat"], "lng": p["lng"], "kind": "port"} for p in PORTS] + FACILITIES
+    matches = [f for f in combined if q in f["name"].lower()]
+    if not matches:
+        return {"error": f"No port or facility found matching '{name}'"}
+    return {"count": len(matches), "facilities": matches[:10]}
+
+
 def find_port_by_name(query):
     if not query:
         return None
@@ -221,6 +533,39 @@ STATUS_MAP = {
     8: "moving",
 }
 
+def format_eta(eta):
+    # Month 0 / Hour 24 / Minute 60 are AIS's "not given" sentinel values.
+    if not eta:
+        return None
+    month, day = eta.get("Month"), eta.get("Day")
+    if not month or not day:
+        return None
+    text = f"{month:02d}-{day:02d}"
+    hour, minute = eta.get("Hour"), eta.get("Minute")
+    if hour is not None and hour <= 23 and minute is not None and minute <= 59:
+        text += f" {hour:02d}:{minute:02d} UTC"
+    return text
+
+
+def match_destination_port(destination):
+    # Destination is free text typed by a human — messy on purpose.
+    # Only match exactly, or as a substantial substring, to avoid false matches.
+    if not destination:
+        return None
+    dest = destination.strip().lower()
+    if len(dest) < 3:
+        return None
+    for p in PORTS:
+        if p["name"].strip().lower() == dest:
+            return p
+    best = None
+    for p in PORTS:
+        name = p["name"].strip().lower()
+        if len(name) >= 4 and (name in dest or dest in name):
+            if best is None or len(name) > len(best["name"]):
+                best = p
+    return best
+
 def map_ship_type(code):
     # AIS ShipType is a numeric code in ranges, not a flat lookup table —
     # e.g. every value 70-79 means some flavor of cargo ship.
@@ -265,6 +610,24 @@ async def listen_to_ais():
                 # (e.g. a vessel_type saved from a ShipStaticData message)
                 # instead of replacing the whole record.
                 existing = live_ships.get(mmsi, {})
+
+                # Departure detection: the moment a ship flips from anchored-in-port
+                # to moving is the real moment it left. Log the nearest real port to
+                # its PREVIOUS position (where it just was), not its new one. Only
+                # fires going forward — nothing before this feature existed is known.
+                new_status = STATUS_MAP.get(report.get("NavigationalStatus"), "anchored-sea")
+                if existing.get("status") == "anchored-port" and new_status == "moving":
+                    old_lat, old_lng = existing.get("lat"), existing.get("lng")
+                    if old_lat is not None and old_lng is not None:
+                        nearest, nearest_dist = None, None
+                        for p in PORTS:
+                            d = haversine_km(old_lat, old_lng, p["lat"], p["lng"])
+                            if nearest_dist is None or d < nearest_dist:
+                                nearest_dist, nearest = d, p
+                        if nearest and nearest_dist <= 15:
+                            existing["departure_port"] = {"name": nearest["name"], "lat": nearest["lat"], "lng": nearest["lng"]}
+                            existing["departure_time"] = datetime.now(timezone.utc).isoformat()
+
                 live_ships[mmsi] = {
                     **existing,
                     "mmsi": mmsi,
@@ -293,6 +656,15 @@ async def listen_to_ais():
                     live_ships[mmsi]["imo"] = imo if imo else None
                     call_sign = (static.get("CallSign") or "").strip()
                     live_ships[mmsi]["call_sign"] = call_sign or None
+                    destination = (static.get("Destination") or "").strip()
+                    live_ships[mmsi]["destination"] = destination or None
+                    live_ships[mmsi]["eta"] = format_eta(static.get("Eta"))
+                    dest_port = match_destination_port(destination)
+                    live_ships[mmsi]["destination_port"] = (
+                        {"name": dest_port["name"], "lat": dest_port["lat"], "lng": dest_port["lng"]}
+                        if dest_port else None
+                    )
+
 
 async def ais_background_loop():
     # The connection will eventually drop on its own — reconnect
@@ -336,16 +708,19 @@ def get_dark_fleet():
 
 class ChatRequest(BaseModel):
     message: str
+    history: list[dict] = []
 
 
 def query_ships(vessel_type=None, status=None, is_dark_flagged=None,
-                 min_minutes_since_update=None, near_port=None, radius_km=None):
+                 min_minutes_since_update=None, near_port=None, radius_km=None, has_destination=None):
     ships = flag_dark_ships(list(live_ships.values()))
 
     if vessel_type:
         ships = [s for s in ships if s.get("vessel_type") == vessel_type]
     if status:
         ships = [s for s in ships if s.get("status") == status]
+    if has_destination is not None:
+        ships = [s for s in ships if bool(s.get("destination")) == has_destination]
     if is_dark_flagged is not None:
         ships = [s for s in ships if s.get("is_dark_flagged") == is_dark_flagged]
     if min_minutes_since_update is not None:
@@ -401,40 +776,62 @@ def groq_post(payload):
         time.sleep(min(wait, 15))
     return resp
 
-def find_ship(name):
-    if not name:
-        return {"error": "No ship name given"}
-    name_lower = name.lower()
-    matches = [
-        s for s in flag_dark_ships(list(live_ships.values()))
-        if name_lower in (s.get("name") or "").lower()
-    ]
+
+def find_ship(name=None, imo=None):
+    if not name and not imo:
+        return {"error": "No ship name or IMO given"}
+    matches = flag_dark_ships(list(live_ships.values()))
+    if name:
+        name_lower = name.lower()
+        matches = [s for s in matches if name_lower in (s.get("name") or "").lower()]
+    if imo:
+        try:
+            imo_int = int(imo)
+            matches = [s for s in matches if s.get("imo") == imo_int]
+        except (TypeError, ValueError):
+            pass
     if not matches:
-        return {"error": f"No live ship found matching '{name}'. It may be outside the tracked North Sea / English Channel region, or its name may differ from what was asked."}
-    if len(matches) > 1:
-        return {
-            "count": len(matches),
-            "matches": [{"name": m["name"], "flag": m.get("flag"), "status": m.get("status")} for m in matches[:10]],
-        }
+        return {"error": "No live ship found matching that name/IMO. It may be outside the tracked North Sea / English Channel region, or its details may differ from what was asked."}
 
-    ship = matches[0]
-    nearest = None
-    nearest_dist = None
-    for p in PORTS:
-        d = haversine_km(ship["lat"], ship["lng"], p["lat"], p["lng"])
-        if nearest_dist is None or d < nearest_dist:
-            nearest_dist = d
-            nearest = p
+    results = []
+    for ship in matches[:10]:
+        nearest = None
+        nearest_dist = None
+        for p in PORTS:
+            d = haversine_km(ship["lat"], ship["lng"], p["lat"], p["lng"])
+            if nearest_dist is None or d < nearest_dist:
+                nearest_dist = d
+                nearest = p
+        ship_copy = dict(ship)
+        if "last_seen" in ship_copy:
+            ship_copy["last_seen"] = str(ship_copy["last_seen"])
+        ship_copy["nearest_port"] = nearest["name"] if nearest else None
+        ship_copy["nearest_port_distance_km"] = round(nearest_dist, 1) if nearest_dist is not None else None
+        ship_copy["nearest_port_direction"] = bearing_compass(ship["lat"], ship["lng"], nearest["lat"], nearest["lng"]) if nearest else None
+        results.append(ship_copy)
 
-    return {
-        "name": ship["name"],
-        "flag": ship.get("flag"),
-        "status": ship.get("status"),
-        "vessel_type": ship.get("vessel_type"),
-        "nearest_port": nearest["name"] if nearest else None,
-        "nearest_port_distance_km": round(nearest_dist, 1) if nearest_dist is not None else None,
-        "nearest_port_direction": bearing_compass(ship["lat"], ship["lng"], nearest["lat"], nearest["lng"]) if nearest else None,
-    }
+    return {"count": len(matches), "ships": results}
+
+
+FACILITY_TOOL = {
+    "type": "function",
+    "function": {
+        "name": "find_facility",
+        "description": (
+            "Look up a specific port, lighthouse, shipyard, ship recycling yard, "
+            "bunkering station, dry dock, or wet dock by name, to get its real "
+            "location so it can be highlighted on the map."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string", "description": "The facility's name, e.g. 'Rotterdam' or 'Portland Head Light'"},
+            },
+            "required": ["name"],
+        },
+    },
+}
+
 
 CHAT_TOOLS = [
     {
@@ -451,17 +848,18 @@ CHAT_TOOLS = [
                 "type": "object",
                 "properties": {
                     "vessel_type": {
-                        "type": "string",
-                        "enum": ["cargo", "tanker", "fishing", "passenger", "tug", "pleasure", "official", "other", "unknown"],
+                        "type": ["string", "null"],
+                        "enum": ["cargo", "tanker", "fishing", "passenger", "tug", "pleasure", "official", "other", "unknown", None],
                     },
                     "status": {
-                        "type": "string",
-                        "enum": ["moving", "anchored-port", "anchored-sea"],
+                        "type": ["string", "null"],
+                        "enum": ["moving", "anchored-port", "anchored-sea", None],
                     },
-                    "is_dark_flagged": {"type": "boolean"},
-                    "min_minutes_since_update": {"type": "number"},
-                    "near_port": {"type": "string", "description": "A port name, e.g. 'Rotterdam'"},
-                    "radius_km": {"type": "number", "description": "Search radius around near_port, default 20km"},
+                    "is_dark_flagged": {"type": ["boolean", "null"]},
+                    "min_minutes_since_update": {"type": ["number", "null"]},
+                    "near_port": {"type": ["string", "null"], "description": "A port name, e.g. 'Rotterdam'"},
+                    "radius_km": {"type": ["number", "null"], "description": "Search radius around near_port, default 20km"},
+                    "has_destination": {"type": ["boolean", "null"], "description": "True to only return ships that have broadcast a destination in their AIS static data"},
                 },
             },
         },
@@ -486,20 +884,22 @@ CHAT_TOOLS = [
         "function": {
             "name": "find_ship",
             "description": (
-                "Look up a specific live ship by name and get its real position, status, "
-                "and its actual nearest port with distance and compass direction. Always use "
-                "this for questions about a named ship — never assume a ship's name refers to "
+                "Look up a specific live ship by name and/or IMO number. Returns full "
+                "details for every match (up to 10) — use the imo parameter to "
+                "disambiguate when two ships have similar names. Always use this for "
+                "questions about a named ship — never assume a ship's name refers to "
                 "a real-world place."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "name": {"type": "string", "description": "The ship's name, e.g. 'RATINGEN'"},
+                    "name": {"type": "string", "description": "The ship's name, e.g. 'RATINGEN'. Optional if imo is given."},
+                    "imo": {"type": "string", "description": "The ship's IMO number, if known — use to disambiguate between similarly-named ships."},
                 },
-                "required": ["name"],
             },
         },
     },
+    FACILITY_TOOL,
 ]
 
 
@@ -519,22 +919,32 @@ def chat(req: ChatRequest):
         "(e.g. which is busier), call port_direction to state the real distance and "
         "compass direction between them rather than guessing. For questions about a specific "
         "named ship (e.g. 'nearest port to X'), always call find_ship — never assume the name "
-        "refers to a real-world place, since it's a ship you're tracking live. When asked which port is "
+        "refers to a real-world place, since it's a ship you're tracking live. If find_ship returns "
+        "more than one match, use the returned IMO numbers to pick the right one rather than "
+        "guessing — never claim a ship does or doesn't have a particular IMO unless you can see "
+        "it in the actual returned data. For questions about a "
+        "specific named port, lighthouse, shipyard, recycling yard, bunkering station, or dry/wet dock, "
+        "call find_facility to get its real location. When asked which port is "
         "busiest, always also look up at least one other nearby port and mention it by name "
         "for comparison, e.g. 'For comparison, X has only N ships nearby.' Never write two or "
         "more numbers on the same line without a comma or a line break between them — "
         "write 'Moving: 37, Anchored-port: 20, Anchored-sea: 8', not 'Moving: 37 Anchored-port: 20'. "
-        "Do not list individual sample ship names unless the person specifically asks for named ships — "
-        "stick to counts and breakdowns by status/type."
+        "Do not list individual sample ships unless the person specifically asks for named ships — "
+        "stick to counts and breakdowns by status/type. When the person refers back to a previous "
+        "result — 'show them', 'point to them', 'highlight those' — call query_ships again with the "
+        "exact same filters as the query that produced that result. Never call it with no filters "
+        "just because the person said 'them' or 'those' — that would silently show the entire fleet "
+        "instead of what they actually asked about."
     )
 
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": req.message},
-    ]
+    messages = [{"role": "system", "content": system_prompt}]
+    for turn in req.history[-10:]:
+        if turn.get("role") in ("user", "assistant") and turn.get("content"):
+            messages.append({"role": turn["role"], "content": turn["content"]})
+    messages.append({"role": "user", "content": req.message})
 
-    matched_ships = []
-    matched_count = 0
+    matched_ships_map = {}
+    matched_facilities_map = {}
     tool_call_count = 0
     MAX_ROUNDS = 5
 
@@ -559,10 +969,11 @@ def chat(req: ChatRequest):
 
         if not tool_calls:
             final_text = choice.get("content") or ""
-            # Only highlight ships on the globe when the answer came from a single lookup.
-            if tool_call_count != 1:
-                matched_ships = []
-            return {"reply": final_text, "ships": matched_ships, "count": matched_count}
+            return {
+                "reply": final_text,
+                "ships": list(matched_ships_map.values()),
+                "facilities": list(matched_facilities_map.values()),
+            }
 
         messages.append({
             "role": "assistant",
@@ -578,17 +989,28 @@ def chat(req: ChatRequest):
                     result = port_direction(**args)
                 elif fn_name == "find_ship":
                     result = find_ship(**args)
+                elif fn_name == "find_facility":
+                    result = find_facility(**args)
                 else:
                     result = query_ships(**args)
             except Exception as e:
                 result = {"error": f"tool call failed: {e}"}
-            if "ships" in result:
-                matched_ships = result["ships"]
-                matched_count = result.get("count", len(matched_ships))
+            # Only accumulate when the result is a complete (non-truncated) match set —
+            # e.g. 2 real ships found, not a 20-ship sample of a 1,000+ broad query.
+            if "ships" in result and result.get("count") == len(result.get("ships", [])):
+                for s in result["ships"]:
+                    matched_ships_map[s["name"]] = s
+            if "facilities" in result and result.get("count") == len(result.get("facilities", [])):
+                for f in result["facilities"]:
+                    matched_facilities_map[(f["name"], f["kind"])] = f
             messages.append({
                 "role": "tool",
                 "tool_call_id": call["id"],
                 "content": json.dumps(slim_for_model(result)),
             })
 
-    return {"reply": "Sorry, I couldn't finish that question.", "ships": [], "count": 0}
+    return {
+        "reply": "Sorry, I couldn't finish that question.",
+        "ships": list(matched_ships_map.values()),
+        "facilities": list(matched_facilities_map.values()),
+    }
