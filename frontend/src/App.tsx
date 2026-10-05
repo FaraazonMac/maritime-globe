@@ -1025,24 +1025,6 @@ function App() {
         }}
         objectsTransitionDuration={0}
 
-        arcsData={[
-          ...(selectedShip?.destination_port ? [{
-            startLat: selectedShip.lat, startLng: selectedShip.lng,
-            endLat: selectedShip.destination_port.lat, endLng: selectedShip.destination_port.lng,
-            color: '#3fd9c7',
-          }] : []),
-          ...(selectedShip?.departure_port ? [{
-            startLat: selectedShip.departure_port.lat, startLng: selectedShip.departure_port.lng,
-            endLat: selectedShip.lat, endLng: selectedShip.lng,
-            color: '#e07b3f',
-          }] : []),
-        ]}
-        arcColor={(a) => a.color}
-        arcDashLength={0.4}
-        arcDashGap={0.2}
-        arcDashAnimateTime={2000}
-        arcStroke={0.4}
-
         htmlElementsData={[...facilityMarkers, ...textLabels]}
         htmlLat="lat"
         htmlLng="lng"
