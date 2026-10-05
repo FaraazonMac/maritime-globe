@@ -37,6 +37,8 @@ Most public ship trackers show you *where* ships are. This project treats the li
 - **Nearest-facility awareness** — real distance and compass bearing from any ship to the nearest port, lighthouse, shipyard, recycling yard, bunkering station, dry dock, and wet dock
 - **Global infrastructure data** — ~3,630 real ports (NGA World Port Index) plus curated real shipyards, lighthouses, recycling yards, bunkering stations, and dry/wet docks, all as toggleable map layers
 - **Interactive port-checker** — "Check another port →" cycles through progressively farther ports from a selected ship, each numbered live on the globe
+- **Voyage data** — destination and ETA from AIS, plus departure ports detected live when a ship leaves a known port. The departure log is saved to disk and survives restarts, but only covers departures observed while the server was running
+- **Smarter chat** — remembers the conversation, looks up ships by name or IMO and facilities by name, filters by flag, departure port and destination, and highlights whole result sets on the globe
 
 ## Scope: Why Not Every Ship Worldwide?
 
@@ -125,13 +127,14 @@ Open `http://localhost:5173`.
 
 | `GET` | `/ships` | All currently tracked ships, with dark-fleet flags applied |
 | `GET` | `/ships/dark-fleet` | Only ships currently flagged as dark |
-| `POST` | `/chat` | AI fleet assistant — `{ "message": "..." }` in, `{ "reply", "ships", "count" }` out |
+| `POST` | `/chat` | AI fleet assistant. Send `{ "message": "...", "history": [...] }`, get `{ "reply", "ships", "facilities" }` back |
 
 ## Known Limitations
 
 - No operator or build-year data — this doesn't exist in AIS broadcasts. The only real source (Equasis) requires a login with no public API, and this project doesn't build scrapers for authenticated third-party services.
 - Some smaller vessels (fishing boats, pleasure craft, Class B AIS transponders) never broadcast an IMO number — a real limitation of the ship's equipment, not a bug.
 - Live ship tracking is scoped to the North Sea/English Channel (see [Scope](#scope-why-not-every-ship-worldwide) above).
+- Departure ports are only recorded for departures observed while the server is running. Ships that left port before that are unknown, and "departed yesterday"-style questions can't be answered.
 
 ## Roadmap
 
