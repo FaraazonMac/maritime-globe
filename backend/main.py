@@ -527,6 +527,25 @@ def flag_from_mmsi(mmsi):
 # whatever's currently in here at the moment it's asked.
 live_ships: dict[int, dict] = {}
 
+# Departure log persisted to disk so it survives restarts.
+# Keyed by MMSI as text (JSON keys are strings).
+DEPARTURES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "departures.json")
+try:
+    with open(DEPARTURES_FILE) as f:
+        DEPARTURES = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    DEPARTURES = {}
+
+
+def save_departures():
+    try:
+        tmp = DEPARTURES_FILE + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump(DEPARTURES, f)
+        os.replace(tmp, DEPARTURES_FILE)
+    except OSError as e:
+        print(f"Could not save departures: {e}")
+
 STATUS_MAP = {
     0: "moving", 1: "anchored-sea", 2: "anchored-sea", 3: "anchored-sea",
     4: "anchored-sea", 5: "anchored-port", 6: "anchored-sea", 7: "moving",
@@ -610,6 +629,8 @@ async def listen_to_ais():
                 # (e.g. a vessel_type saved from a ShipStaticData message)
                 # instead of replacing the whole record.
                 existing = live_ships.get(mmsi, {})
+                if "departure_port" not in existing and str(mmsi) in DEPARTURES:
+                    existing = {**existing, **DEPARTURES[str(mmsi)]}
 
                 # Departure detection: the moment a ship flips from anchored-in-port
                 # to moving is the real moment it left. Log the nearest real port to
@@ -627,6 +648,11 @@ async def listen_to_ais():
                         if nearest and nearest_dist <= 15:
                             existing["departure_port"] = {"name": nearest["name"], "lat": nearest["lat"], "lng": nearest["lng"]}
                             existing["departure_time"] = datetime.now(timezone.utc).isoformat()
+                            DEPARTURES[str(mmsi)] = {
+                                "departure_port": existing["departure_port"],
+                                "departure_time": existing["departure_time"],
+                            }
+                            save_departures()
 
                 live_ships[mmsi] = {
                     **existing,
