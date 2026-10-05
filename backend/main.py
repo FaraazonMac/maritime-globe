@@ -713,7 +713,8 @@ class ChatRequest(BaseModel):
 
 def query_ships(vessel_type=None, status=None, is_dark_flagged=None,
                  min_minutes_since_update=None, near_port=None, radius_km=None,
-                 has_destination=None, has_departure=None):
+                 has_destination=None, has_departure=None, flag=None,
+                 departed_from=None, destination_contains=None):
     ships = flag_dark_ships(list(live_ships.values()))
 
     if vessel_type:
@@ -750,7 +751,15 @@ def query_ships(vessel_type=None, status=None, is_dark_flagged=None,
         if "last_seen" in s_copy:
             s_copy["last_seen"] = str(s_copy["last_seen"])
         trimmed.append(s_copy)
-    return {"count": len(ships), "by_status": by_status, "by_type": by_type, "ships": trimmed}
+    # Every match (id, name, position only) so the globe can highlight the whole set.
+    # Past 500 ships a highlight stops being meaningful, so send none.
+    highlight = []
+    if len(ships) <= 500:
+        highlight = [
+            {"mmsi": s.get("mmsi"), "name": s.get("name"), "lat": s["lat"], "lng": s["lng"]}
+            for s in ships
+        ]
+    return {"count": len(ships), "by_status": by_status, "by_type": by_type, "ships": trimmed, "highlight": highlight}
 
 
 def slim_for_model(result):
@@ -864,6 +873,9 @@ CHAT_TOOLS = [
                     "radius_km": {"type": ["number", "null"], "description": "Search radius around near_port, default 20km"},
                     "has_destination": {"type": ["boolean", "null"], "description": "True to only return ships that have broadcast a destination in their AIS static data"},
                     "has_departure": {"type": ["boolean", "null"], "description": "True to only return ships with a logged real departure-port event (detected live, not from AIS broadcast)"},
+                    "flag": {"type": ["string", "null"], "description": "Flag state country name, e.g. 'Germany', 'Netherlands', 'United Kingdom', 'Panama'"},
+                    "departed_from": {"type": ["string", "null"], "description": "Only ships whose logged departure port name contains this text, e.g. 'Antwerp'"},
+                    "destination_contains": {"type": ["string", "null"], "description": "Only ships whose broadcast destination text or matched destination port contains this text, e.g. 'Rotterdam'"},
                 },
             },
         },
@@ -928,7 +940,11 @@ def chat(req: ChatRequest):
         "guessing — never claim a ship does or doesn't have a particular IMO unless you can see "
         "it in the actual returned data. For questions about a "
         "specific named port, lighthouse, shipyard, recycling yard, bunkering station, or dry/wet dock, "
-        "call find_facility to get its real location. When asked which port is "
+        "call find_facility to get its real location. If the person says 'point to', 'find' or "
+        "'where is' a name and you cannot tell whether it is a ship or a facility, call BOTH "
+        "find_ship and find_facility before concluding it does not exist, because most names "
+        "that are not ports are ship names. Only say a name was not found after checking both. "
+        "When asked which port is "
         "busiest, always also look up at least one other nearby port and mention it by name "
         "for comparison, e.g. 'For comparison, X has only N ships nearby.' Never write two or "
         "more numbers on the same line without a comma or a line break between them — "
@@ -938,7 +954,11 @@ def chat(req: ChatRequest):
         "result — 'show them', 'point to them', 'highlight those' — call query_ships again with the "
         "exact same filters as the query that produced that result. Never call it with no filters "
         "just because the person said 'them' or 'those' — that would silently show the entire fleet "
-        "instead of what they actually asked about."
+        "instead of what they actually asked about. "
+        "Formatting rules: never use Markdown tables, headings (#) or code blocks, and never use "
+        "'*' bullets. Write short plain lines, one item per line, like "
+        "'VICTORIA — Netherlands, 4.5 kn'. Use '- ' at the start of a line for lists. "
+        "Bold with **text** is fine."
     )
 
     messages = [{"role": "system", "content": system_prompt}]
@@ -999,11 +1019,15 @@ def chat(req: ChatRequest):
                     result = query_ships(**args)
             except Exception as e:
                 result = {"error": f"tool call failed: {e}"}
+            print("TOOL CALL:", call["function"]["name"], call["function"]["arguments"], "->", str(result)[:300])
             # Only accumulate when the result is a complete (non-truncated) match set —
             # e.g. 2 real ships found, not a 20-ship sample of a 1,000+ broad query.
-            if "ships" in result and result.get("count") == len(result.get("ships", [])):
+            if "highlight" in result:
+                for s in result["highlight"]:
+                    matched_ships_map[s["mmsi"]] = s
+            elif "ships" in result and result.get("count") == len(result.get("ships", [])):
                 for s in result["ships"]:
-                    matched_ships_map[s["name"]] = s
+                    matched_ships_map[s["mmsi"]] = s
             if "facilities" in result and result.get("count") == len(result.get("facilities", [])):
                 for f in result["facilities"]:
                     matched_facilities_map[(f["name"], f["kind"])] = f
