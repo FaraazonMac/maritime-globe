@@ -73,19 +73,43 @@ A live 3D ship-tracking globe (React + react-globe.gl) backed by a Python FastAP
 - Made the ship dimming effect apply consistently on both direct ship-click and chat highlighting
 - Panel background, blur, and text-centering cleanup across all four panel types
 
+### Session 12 — Flag/IMO/call sign, chat reliability, weather depth, UI bugs
+- Added real ship identity from AIS: flag derived from the MMSI's Maritime Identification Digits (official ITU country-code table, 290 codes verified against the source list), plus IMO number and call sign captured from `ShipStaticData`
+- Made the chat assistant multi-step: it can call its tools several times per question (e.g. one lookup per port when comparing), retries automatically on Groq's rate limit (429), and sends the model a compact summary instead of full ship records to stay under the token budget
+- Added chat tools `port_direction` (real distance and bearing between two ports) and `find_ship` (live ship lookup by name). This fixed a bug where the model answered ship-name questions from general knowledge, e.g. treating the ship "RATINGEN" as the German town
+- Chat replies now render `**bold**` as bold text and keep line breaks
+- Congestion facility panel now matches the clicked marker's colour (red, amber or green)
+- Built the full live weather block: wind speed, direction and gusts; sky condition with thunderstorm flag; pressure; visibility; wave height, direction and period; swell; sea temperature; and current. Switched from Open-Meteo's `hourly[0]` (which was reading midnight UTC, not now) to its `current` parameter
+- Fixed a page-layout bug: `#root` only had `min-height`, so any overflow made the whole page scrollable. Locking `html`, `body` and `#root` to the viewport also stopped mouse-wheel scrolling over a panel from scrolling the page
+
+### Session 13 — Voyage data, chat upgrades, departure tracking
+- Captured Destination and ETA from AIS static data. The destination text is matched to a known port only on an exact or substantial match, with no forced guesses, and both show in the ship panel
+- Built departure tracking: when a ship flips from anchored-in-port to moving, the nearest known port (within 15 km) of its previous position is logged as `departure_port` with a timestamp. It is held in memory and resets on restart. At one check, 58 ships had both a departure and a destination
+- Chat assistant upgrades:
+  - Conversation memory (history is sent with each message)
+  - Multi-round tool calls with rate-limit retry
+  - New tools: `find_ship` (by name or IMO, returns every match), `find_facility` (ports plus ~150 lighthouses, shipyards, docks and other facilities duplicated server-side), and `port_direction`
+  - New filters: `has_destination` and `has_departure`
+- Chat highlighting: numbered markers for 2+ facilities, ships dim, the camera frames all results, and a Clear button sits in the chat header. Clicking a ship inside a highlighted group keeps the group visible
+- Fixed Groq tool-validation errors by making optional tool parameters nullable
+- Built route arcs from departure to current position to destination, then removed them. For short routes they rendered as oversized wedges, and a flat-line replacement was not worth the risk. The same information stays in the panel as text
+- Wrap-up: README written, `requirements.txt` generated, dead `test_ais.py` deleted, and confirmed `.env` was never committed to git
 
 
 ## Current state
-- ✅ Live globe with real ships, ports, lighthouses, shipyards, recycling yards, bunkering stations, dry/wet docks — all toggleable layers
-- ✅ Dark-fleet / sanctions-evasion detector — complete
-- ✅ Live port congestion score — complete
-- ✅ AI fleet chat assistant (Groq function-calling, multi-step, rate-limit-safe, over live data) — complete
-- ✅ Nearest-facility distance + compass bearing on every ship
+- ✅ Live globe with real ships, ports, lighthouses, shipyards, recycling yards, bunkering stations, dry/wet docks (toggleable layers)
+- ✅ Dark-fleet / sanctions-evasion detector
+- ✅ Live port congestion score
+- ✅ AI fleet chat assistant (Groq function-calling, multi-step, rate-limit-safe, with conversation memory, ship/facility lookup by name, and numbered multi-location highlighting)
+- ✅ Nearest-facility distance and compass bearing on every ship
 - ✅ Full live weather per ship (wind, sky, pressure, visibility, waves, swell, sea temp, current)
 - ✅ Real flag (from MMSI), IMO number, and call sign per ship (where broadcast)
-- ⬜ No operator or build-year data — no legitimate free source exists (Equasis requires login, no public API; not pursuing scraping)
-- ⬜ Live ship tracking still scoped to North Sea/English Channel (not worldwide) — deliberate, due to AIS volume/render performance at global scale
-- ⬜ Groq API key was briefly exposed during debugging in an earlier session — not yet regenerated
+- ✅ Destination and ETA from AIS, plus departure port detected live when a ship leaves a known port
+- ⬜ Departure log is held in memory only and resets on every backend restart
+- ⬜ No operator or build-year data (no legitimate free source; Equasis requires a login and has no public API)
+- ⬜ Live ship tracking is scoped to the North Sea / English Channel by choice, because of AIS coverage, render cost and payload size
 
+## Next target
+Persist the departure log to a file, add a self-check for overall system health, record the demo video, and decide on the global-ships scope.
 ## Next target
 Build a self-check/monitoring feature that verifies the whole project is actually working (backend up, AIS feed live, ports loaded, chat reachable). Then decide on global ship tracking scope, then wrap-up tasks: `requirements.txt`, README rewrite, dead-code cleanup (test_ais.py, test_groq.py), demo video.
