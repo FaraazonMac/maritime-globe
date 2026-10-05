@@ -95,6 +95,16 @@ A live 3D ship-tracking globe (React + react-globe.gl) backed by a Python FastAP
 - Built route arcs from departure to current position to destination, then removed them. For short routes they rendered as oversized wedges, and a flat-line replacement was not worth the risk. The same information stays in the panel as text
 - Wrap-up: README written, `requirements.txt` generated, dead `test_ais.py` deleted, and confirmed `.env` was never committed to git
 
+### Session 14 — Chat filters, full-set highlighting, persistent departures
+- Added chat filters for flag, departure port, and destination text (`flag`, `departed_from`, `destination_contains`), so questions like "Dutch cargo ships heading to Rotterdam" are answered from the data instead of the model guessing from a 5-ship sample
+- Highlighting now covers the entire result set (up to 500 ships) rather than the 20-ship sample the model sees. Ships are keyed by MMSI, so two ships with the same name no longer overwrite each other
+- Added output formatting rules so replies use plain lines instead of Markdown tables the chat box can't render
+- Made the model check both ships and facilities before reporting a name as not found
+- Persisted the departure log to `backend/departures.json` (git-ignored). It is written when a departure is detected and reloaded on startup, so departures survive restarts
+- Rotated the Groq API key after it was exposed during debugging
+
+
+
 
 ## Current state
 - ✅ Live globe with real ships, ports, lighthouses, shipyards, recycling yards, bunkering stations, dry/wet docks (toggleable layers)
@@ -105,7 +115,7 @@ A live 3D ship-tracking globe (React + react-globe.gl) backed by a Python FastAP
 - ✅ Full live weather per ship (wind, sky, pressure, visibility, waves, swell, sea temp, current)
 - ✅ Real flag (from MMSI), IMO number, and call sign per ship (where broadcast)
 - ✅ Destination and ETA from AIS, plus departure port detected live when a ship leaves a known port
-- ⬜ Departure log is held in memory only and resets on every backend restart
+- ✅ Departure log persisted to disk and survives restarts
 - ⬜ No operator or build-year data (no legitimate free source; Equasis requires a login and has no public API)
 - ⬜ Live ship tracking is scoped to the North Sea / English Channel by choice, because of AIS coverage, render cost and payload size
 
