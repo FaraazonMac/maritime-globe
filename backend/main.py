@@ -692,6 +692,25 @@ async def listen_to_ais():
                     )
 
 
+# Ships not heard from for this long are dropped from the live list.
+# Kept well above DARK_THRESHOLD_MINUTES (20) so silent ships are flagged before they vanish.
+SHIP_EXPIRY_MINUTES = 60
+
+
+async def prune_stale_ships_loop():
+    while True:
+        await asyncio.sleep(60)
+        now = datetime.now(timezone.utc)
+        stale = [
+            mmsi for mmsi, s in list(live_ships.items())
+            if s.get("last_seen") and (now - s["last_seen"]).total_seconds() > SHIP_EXPIRY_MINUTES * 60
+        ]
+        for mmsi in stale:
+            live_ships.pop(mmsi, None)
+        if stale:
+            print(f"Expired {len(stale)} stale ships; {len(live_ships)} remain")
+
+
 async def ais_background_loop():
     # The connection will eventually drop on its own — reconnect
     # automatically instead of the feed silently dying forever.
@@ -708,8 +727,10 @@ async def lifespan(app: FastAPI):
     # alongside normal request handling for the server's whole lifetime.
     fetch_ports()
     task = asyncio.create_task(ais_background_loop())
+    prune_task = asyncio.create_task(prune_stale_ships_loop())
     yield
     task.cancel()
+    prune_task.cancel()
 
 app = FastAPI(lifespan=lifespan)
 
