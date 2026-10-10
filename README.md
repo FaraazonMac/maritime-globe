@@ -135,6 +135,7 @@ Open `http://localhost:5173`.
 - Some smaller vessels (fishing boats, pleasure craft, Class B AIS transponders) never broadcast an IMO number — a real limitation of the ship's equipment, not a bug.
 - Live ship tracking is scoped to the North Sea/English Channel (see [Scope](#scope-why-not-every-ship-worldwide) above).
 - Departure ports are only recorded for departures observed while the server is running. Ships that left port before that are unknown, and "departed yesterday"-style questions can't be answered.
+- Ships are dropped from the live list after 60 minutes of silence if they were last seen near the edge of the tracked area, and after 24 hours if they went silent well inside it. A ship that really switched off its transponder near the edge cannot be told apart from one that sailed out of coverage.
 
 ## Roadmap
 
