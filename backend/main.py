@@ -694,7 +694,22 @@ async def listen_to_ais():
 
 # Ships not heard from for this long are dropped from the live list.
 # Kept well above DARK_THRESHOLD_MINUTES (20) so silent ships are flagged before they vanish.
-SHIP_EXPIRY_MINUTES = 60
+SHIP_EXPIRY_MINUTES = 60       # ships that drift out through the edge of the tracked area
+DARK_RETENTION_HOURS = 24      # ships that go silent well inside the area stay visible (as dark fleet) this long
+EDGE_MARGIN_DEG = 0.5
+TRACKED_BOX = (49, -2, 54, 9)  # lat_min, lng_min, lat_max, lng_max; must match the AIS subscription
+
+
+def expiry_seconds(ship):
+    lat_min, lng_min, lat_max, lng_max = TRACKED_BOX
+    lat, lng = ship.get("lat"), ship.get("lng")
+    if lat is None or lng is None:
+        return SHIP_EXPIRY_MINUTES * 60
+    near_edge = (
+        lat < lat_min + EDGE_MARGIN_DEG or lat > lat_max - EDGE_MARGIN_DEG
+        or lng < lng_min + EDGE_MARGIN_DEG or lng > lng_max - EDGE_MARGIN_DEG
+    )
+    return SHIP_EXPIRY_MINUTES * 60 if near_edge else DARK_RETENTION_HOURS * 3600
 
 
 async def prune_stale_ships_loop():
@@ -703,7 +718,7 @@ async def prune_stale_ships_loop():
         now = datetime.now(timezone.utc)
         stale = [
             mmsi for mmsi, s in list(live_ships.items())
-            if s.get("last_seen") and (now - s["last_seen"]).total_seconds() > SHIP_EXPIRY_MINUTES * 60
+            if s.get("last_seen") and (now - s["last_seen"]).total_seconds() > expiry_seconds(s)
         ]
         for mmsi in stale:
             live_ships.pop(mmsi, None)
